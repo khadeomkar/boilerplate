@@ -20,7 +20,6 @@
 .disclosure-library-search input {
   box-sizing: border-box;
   width: 100%;
-  max-width: 480px;
   padding: 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -61,6 +60,65 @@
 
 .disclosure-library-message {
   margin-top: 16px;
+}
+
+
+.disclosure-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.disclosure-record-count {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.disclosure-pagination-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.disclosure-pagination-controls button {
+  min-width: 36px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+}
+
+.disclosure-pagination-controls button:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.disclosure-pagination-controls button.is-active {
+  background: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+.disclosure-pagination-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .disclosure-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .disclosure-pagination-controls {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 768px) {
