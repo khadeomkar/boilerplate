@@ -1,9 +1,8 @@
-
-const API_URL = 'https://api.npoint.io/aea8e183fa49cbca071f';
+const API_URL = 'https://api.npoint.io/5665eb6d83150e73c4cf';
 const PAGE_SIZE = 10;
 
 export default async function decorate(block) {
-    // Preserve the content authored in EDS.
+    // Preserve content authored in EDS.
     const authoredContent = [...block.children];
 
     const title = authoredContent[0]?.querySelector(
@@ -11,14 +10,14 @@ export default async function decorate(block) {
     );
     const description = authoredContent[1];
 
-    // Extract the six individual authored headings, skipping title and description.
+    // Extract the six authorable table headings.
     const tableHeaders = authoredContent
         .slice(2)
         .flatMap((row) => [...row.children])
         .map((cell) => cell.textContent.trim())
         .filter(Boolean);
 
-    // Build the disclosure library UI.
+    // Build the Disclosure Library UI.
     block.innerHTML = `
     <div class="disclosure-library">
       <div class="disclosure-library-header">
@@ -28,36 +27,36 @@ export default async function decorate(block) {
 
       <div class="disclosure-library-actions">
         <div class="disclosure-library-search">
-            <label for="disclosure-search">Search disclosures</label>
-            <input
+          <label for="disclosure-search">Search disclosures</label>
+          <input
             id="disclosure-search"
             type="search"
             placeholder="Search by name, short code, or updated by..."
-            />
+          />
         </div>
 
         <div
-            class="disclosure-library-filters"
-            role="group"
-            aria-label="Filter disclosures"
+          class="disclosure-library-filters"
+          role="group"
+          aria-label="Filter disclosures"
         >
-            <button
+          <button
             type="button"
             class="disclosure-filter-button is-active"
             data-filter="all"
             aria-pressed="true"
-            >
+          >
             All Disclosures
-            </button>
+          </button>
 
-            <button
+          <button
             type="button"
             class="disclosure-filter-button"
             data-filter="pending"
             aria-pressed="false"
-            >
+          >
             Pending Requests
-            </button>
+          </button>
         </div>
       </div>
 
@@ -72,24 +71,43 @@ export default async function decorate(block) {
 
       <div class="disclosure-pagination"></div>
       <p class="disclosure-library-message" aria-live="polite"></p>
+      <dialog class="disclosure-preview-modal" aria-labelledby="disclosure-modal-title">
+        <div class="disclosure-preview-modal-header">
+            <h2 id="disclosure-modal-title">Disclosure Preview</h2>
+            <button
+            type="button"
+            class="disclosure-modal-close"
+            aria-label="Close preview"
+            >
+            &times;
+            </button>
+        </div>
+
+        <div class="disclosure-preview-modal-content"></div>
+      </dialog>
     </div>
   `;
 
     const titleContainer = block.querySelector('.disclosure-library-title');
     const descriptionContainer = block.querySelector('.disclosure-description');
     const headerRow = block.querySelector('.disclosure-table-header');
+    const previewModal = block.querySelector('.disclosure-preview-modal');
+    const previewModalContent = block.querySelector(
+        '.disclosure-preview-modal-content',
+    );
+    const closeModalButton = block.querySelector('.disclosure-modal-close');
 
-    // Insert the authored title.
+    // Render the authored title.
     if (title && titleContainer) {
         titleContainer.replaceChildren(title.cloneNode(true));
     }
 
-    // Insert the authored description.
+    // Render the authored description.
     if (description && descriptionContainer) {
         descriptionContainer.innerHTML = description.innerHTML;
     }
 
-    // Generate table headings from EDS authoring.
+    // Render authorable column headings.
     tableHeaders.forEach((heading) => {
         const th = document.createElement('th');
         th.textContent = heading;
@@ -108,7 +126,61 @@ export default async function decorate(block) {
     let currentPage = 1;
     let activeFilter = 'all';
 
-    // Apply the selected filter and search query together.
+    // Read a named value from AEM stringMetadata.
+    function getMetadataValue(item, metadataName) {
+        const metadata = item?._metadata?.stringMetadata;
+
+        if (!Array.isArray(metadata)) {
+            return '';
+        }
+
+        const entry = metadata.find(
+            (field) => field.name === metadataName,
+        );
+
+        return entry?.value ?? '';
+    }
+
+    // Read a named value from AEM calendarMetadata.
+    function getCalendarValue(item, metadataName) {
+        const metadata = item?._metadata?.calendarMetadata;
+
+        if (!Array.isArray(metadata)) {
+            return '';
+        }
+
+        const entry = metadata.find(
+            (field) => field.name === metadataName,
+        );
+
+        return entry?.value ?? '';
+    }
+
+    // Convert the AEM GraphQL record into the UI data structure.
+    function normalizeDisclosure(item) {
+        return {
+            name: getMetadataValue(item, 'disc.disclaimerName'),
+            updatedBy: getMetadataValue(item, 'disc.owner'),
+            description: getMetadataValue(item, 'disc.description'),
+            shortCode: getMetadataValue(item, 'disc.disclaimerId'),
+
+            // AEM stores the last-modified date in calendarMetadata.
+            lastUpdated: getCalendarValue(item, 'cq:lastModified'),
+
+            // These fields are not present in the supplied API response.
+            timesUsed: item.timesUsed ?? '',
+            editRequests: Array.isArray(item.editRequests)
+                ? item.editRequests
+                : [],
+
+            // Use approved content when available for the preview.
+            preview:
+                item.approvedCopy?.plaintext
+                || getMetadataValue(item, 'disc.description'),
+        };
+    }
+
+    // Apply search and the selected filter together.
     function applyFilters() {
         const query = searchInput.value.trim().toLowerCase();
 
@@ -117,16 +189,18 @@ export default async function decorate(block) {
                 item.name,
                 item.shortCode,
                 item.updatedBy,
+                item.description,
             ].some((value) =>
                 String(value ?? '').toLowerCase().includes(query),
             );
 
-            const hasPendingRequest = Array.isArray(item.editRequests)
-                && item.editRequests.some((request) => (
-                    String(
-                        typeof request === 'string' ? request : request?.status ?? '',
-                    ).toLowerCase() === 'pending'
-                ));
+            const hasPendingRequest = item.editRequests.some((request) => (
+                String(
+                    typeof request === 'string'
+                        ? request
+                        : request?.status ?? '',
+                ).toLowerCase() === 'pending'
+            ));
 
             const matchesFilter = activeFilter === 'all'
                 || (activeFilter === 'pending' && hasPendingRequest);
@@ -138,7 +212,7 @@ export default async function decorate(block) {
         renderRows();
     }
 
-    // Switch the active filter button.
+    // Filter buttons.
     filterButtons.forEach((button) => {
         button.addEventListener('click', () => {
             activeFilter = button.dataset.filter;
@@ -176,22 +250,24 @@ export default async function decorate(block) {
 
             // Disclosure Name.
             const nameCell = document.createElement('td');
-            nameCell.textContent = item.name ?? '';
+            nameCell.textContent = item.name;
             row.append(nameCell);
 
             // Last Updated.
             const updatedCell = document.createElement('td');
-            updatedCell.textContent = item.lastUpdated ?? '';
+            updatedCell.textContent = item.lastUpdated
+                ? new Date(item.lastUpdated).toLocaleDateString('en-GB')
+                : '';
             row.append(updatedCell);
 
             // Updated By.
             const updatedByCell = document.createElement('td');
-            updatedByCell.textContent = item.updatedBy ?? '';
+            updatedByCell.textContent = item.updatedBy;
             row.append(updatedByCell);
 
             // Times Used.
             const timesUsedCell = document.createElement('td');
-            timesUsedCell.textContent = item.timesUsed ?? '';
+            timesUsedCell.textContent = item.timesUsed;
             row.append(timesUsedCell);
 
             // Preview.
@@ -202,15 +278,16 @@ export default async function decorate(block) {
             previewButton.textContent = 'Preview';
 
             previewButton.addEventListener('click', () => {
-                window.alert(
-                    item.content || item.preview || 'No preview available.',
-                );
+                previewModalContent.textContent =
+                    item.preview || 'No preview available.';
+
+                previewModal.showModal();
             });
 
             previewCell.append(previewButton);
             row.append(previewCell);
 
-            // Short Code with copy icon.
+            // Short Code and copy button.
             const codeCell = document.createElement('td');
             const codeWrapper = document.createElement('div');
             const code = document.createElement('code');
@@ -222,7 +299,7 @@ export default async function decorate(block) {
             copyButton.setAttribute('aria-label', 'Copy short code');
             copyButton.title = 'Copy short code';
 
-            code.textContent = item.shortCode ?? '';
+            code.textContent = item.shortCode;
 
             const copyIcon = `
         <svg xmlns="http://www.w3.org/2000/svg"
@@ -249,7 +326,7 @@ export default async function decorate(block) {
 
             copyButton.addEventListener('click', async () => {
                 try {
-                    await navigator.clipboard.writeText(item.shortCode ?? '');
+                    await navigator.clipboard.writeText(item.shortCode);
 
                     copyButton.innerHTML = copiedIcon;
                     copyButton.setAttribute('aria-label', 'Copied');
@@ -330,6 +407,7 @@ export default async function decorate(block) {
         message.textContent = totalRecords ? '' : 'No disclosures found.';
     }
 
+    // Fetch and render AEM GraphQL data.
     try {
         message.textContent = 'Loading disclosures...';
 
@@ -341,9 +419,17 @@ export default async function decorate(block) {
 
         const data = await response.json();
 
-        disclosures = Array.isArray(data)
-            ? data
-            : data.disclosures || [];
+        // Exact path verified from the supplied API:
+        // data.data.disclaimerHubList.items
+        const items = data?.data?.disclaimerHubList?.items;
+
+        if (!Array.isArray(items)) {
+            throw new Error(
+                'Unexpected API response: data.disclaimerHubList.items is missing.',
+            );
+        }
+
+        disclosures = items.map(normalizeDisclosure);
 
         applyFilters();
     } catch (error) {
@@ -351,9 +437,21 @@ export default async function decorate(block) {
         console.error('Unable to load disclosures:', error);
 
         message.textContent =
-            'Unable to load disclosures. Please check the API or network connection.';
+            'Unable to load disclosures. Check the API response and network connection.';
     }
 
-    // Search within the currently selected filter.
+    // Close the modal using the close button.
+    closeModalButton.addEventListener('click', () => {
+        previewModal.close();
+    });
+
+    // Close when clicking the backdrop outside the modal content.
+    previewModal.addEventListener('click', (event) => {
+        if (event.target === previewModal) {
+            previewModal.close();
+        }
+    });
+
+    // Search disclosures.
     searchInput.addEventListener('input', applyFilters);
 }

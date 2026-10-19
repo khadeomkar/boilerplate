@@ -182,6 +182,68 @@ button.disclosure-copy-button {
   cursor: not-allowed;
 }
 
+
+.disclosure-preview-modal {
+  position: fixed;
+  inset: 0;
+  width: min(600px, calc(100% - 32px));
+  max-width: 600px;
+  max-height: 80vh;
+  margin: auto;
+  padding: 24px;
+  border: none;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+  overflow-y: auto;
+}
+
+.disclosure-preview-modal::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.disclosure-preview-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.disclosure-preview-modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.disclosure-modal-close {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: #333;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.disclosure-preview-modal-content {
+  padding-top: 20px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .disclosure-preview-modal {
+    padding: 18px;
+  }
+
+  .disclosure-preview-modal-header h2 {
+    font-size: 18px;
+  }
+}
+
 @media (max-width: 600px) {
   .disclosure-pagination {
     align-items: flex-start;
