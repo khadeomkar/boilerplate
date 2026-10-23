@@ -205,11 +205,17 @@ button.disclosure-copy-button {
 
 .disclosure-preview-modal-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
   gap: 16px;
   padding-bottom: 16px;
   border-bottom: 1px solid #ddd;
+}
+
+.disclosure-preview-modal-heading {
+  flex: 1;
+  min-width: 0;
 }
 
 .disclosure-preview-modal-header h2 {
@@ -217,8 +223,16 @@ button.disclosure-copy-button {
   font-size: 22px;
 }
 
+.disclosure-preview-updated {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .disclosure-modal-close {
   flex-shrink: 0;
+  margin-left: auto;
+  align-self: flex-start;
   border: none;
   background: transparent;
   color: #333;

@@ -88,7 +88,10 @@ export default async function decorate(block) {
           aria-labelledby="disclosure-modal-title"
         >
           <div class="disclosure-preview-modal-header">
-            <h2 id="disclosure-modal-title">Disclosure Preview</h2>
+            <div class="disclosure-preview-modal-heading">
+                <h2 id="disclosure-modal-title">Disclosure Preview</h2>
+                <p class="disclosure-preview-updated"></p>
+            </div>
 
             <button
               type="button"
@@ -112,6 +115,10 @@ export default async function decorate(block) {
     );
     const headerRow = block.querySelector('.disclosure-table-header');
     const previewModal = block.querySelector('.disclosure-preview-modal');
+    const previewModalTitle = block.querySelector('#disclosure-modal-title');
+    const previewModalUpdated = block.querySelector(
+        '.disclosure-preview-updated',
+    );
     const previewModalContent = block.querySelector(
         '.disclosure-preview-modal-content',
     );
@@ -280,8 +287,49 @@ export default async function decorate(block) {
                 authorableSettings['preview button text'];
 
             previewButton.addEventListener('click', () => {
-                previewModalContent.textContent =
-                    item.preview || 'No preview available.';
+                // Display the actual disclosure name as the modal title.
+                previewModalTitle.textContent = item.name || 'Disclosure Preview';
+
+                // Clear previous preview content.
+                previewModalContent.replaceChildren();
+
+                // Format the last-updated date.
+                const updatedDate = item.lastUpdated
+                    ? new Date(item.lastUpdated).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                    })
+                    : '';
+
+                // Display last-updated information.
+                previewModalUpdated.textContent = [
+                    'Last updated',
+                    updatedDate,
+                    item.updatedBy ? `by ${item.updatedBy}` : '',
+                ].filter(Boolean).join(' ');
+
+                // Disclosure Text label.
+                const disclosureLabel = document.createElement('h3');
+                disclosureLabel.textContent = 'Disclosure Text';
+                previewModalContent.append(disclosureLabel);
+
+                // Disclosure description/content.
+                const disclosureText = document.createElement('p');
+                disclosureText.className = 'disclosure-preview-text';
+                disclosureText.textContent = item.preview || item.description || '';
+                previewModalContent.append(disclosureText);
+
+                // Short Code label.
+                const shortCodeLabel = document.createElement('h3');
+                shortCodeLabel.textContent = 'Short Code';
+                previewModalContent.append(shortCodeLabel);
+
+                // Short Code value.
+                const shortCodeValue = document.createElement('p');
+                shortCodeValue.className = 'disclosure-preview-shortcode';
+                shortCodeValue.textContent = item.shortCode || '';
+                previewModalContent.append(shortCodeValue);
 
                 previewModal.showModal();
             });
