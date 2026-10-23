@@ -15,6 +15,7 @@
 :root {
   /* colors */
   --background-color: white;
+  --secondary-background-color: #F5F5FA;
   --light-color: #f8f8f8;
   --dark-color: #505050;
   --text-color: #131313;

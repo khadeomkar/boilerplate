@@ -50,13 +50,13 @@ export default async function decorate(block) {
 
     // Build the Disclosure Library UI.
     block.innerHTML = `
-      <div class="disclosure-library">
+      <section id="page-disclosure" class="disclosure-library">
         <div class="disclosure-library-header">
           <div class="disclosure-library-title"></div>
           <div class="disclosure-description"></div>
         </div>
 
-        <div class="disclosure-library-actions">
+        <div class="disclosure-library-toolbar">
           <div class="disclosure-library-search">
             <label for="disclosure-search"></label>
             <input
@@ -65,6 +65,14 @@ export default async function decorate(block) {
               placeholder=""
             />
           </div>
+          
+          <div class="disclosure-library-filters">
+            <select id="product-line-filter" class="disclosure-filter-select">
+              <option value="">All Product Lines</option>
+            </select>
+          </div>
+          
+          <button type="button" class="disclosure-new-button">+ New Disclosure</button>
         </div>
 
         <div class="disclosure-library-table-wrapper">
@@ -104,7 +112,7 @@ export default async function decorate(block) {
 
           <div class="disclosure-preview-modal-content"></div>
         </dialog>
-      </div>
+      </section>
     `;
 
     const titleContainer = block.querySelector(
@@ -283,8 +291,28 @@ export default async function decorate(block) {
             const previewButton = document.createElement('button');
 
             previewButton.type = 'button';
-            previewButton.textContent =
-                authorableSettings['preview button text'];
+            previewButton.className = 'disclosure-preview-button';
+            
+            // Add eye icon before text
+            const eyeIcon = `
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+            `;
+            
+            previewButton.innerHTML = eyeIcon + `<span>${authorableSettings['preview button text']}</span>`;
 
             previewButton.addEventListener('click', () => {
                 // Display the actual disclosure name as the modal title.
