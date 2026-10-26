@@ -51,13 +51,12 @@ export default async function decorate(block) {
     // Build the Disclosure Library UI.
     block.innerHTML = `
       <section id="page-disclosure" class="disclosure-library">
-        <div class="disclosure-library-header">
-          <div class="disclosure-library-title"></div>
-          <div class="disclosure-description"></div>
+        <div class="page-header">
+          <div class="eyebrow">Disclosure Management</div>
         </div>
 
-        <div class="disclosure-library-toolbar">
-          <div class="disclosure-library-search">
+        <div class="toolbar">
+          <div class="toolbar-search">
             <label for="disclosure-search"></label>
             <input
               id="disclosure-search"
@@ -66,9 +65,12 @@ export default async function decorate(block) {
             />
           </div>
           
-          <div class="disclosure-library-filters">
+          <div class="toolbar-filters">
             <select id="product-line-filter" class="disclosure-filter-select">
               <option value="">All Product Lines</option>
+              <option value="">Commercial</option>
+              <option value="">Dental</option>
+              <option value="">Vision</option>
             </select>
           </div>
           
@@ -115,12 +117,7 @@ export default async function decorate(block) {
       </section>
     `;
 
-    const titleContainer = block.querySelector(
-        '.disclosure-library-title',
-    );
-    const descriptionContainer = block.querySelector(
-        '.disclosure-description',
-    );
+    const pageHeader = block.querySelector('.page-header');
     const headerRow = block.querySelector('.disclosure-table-header');
     const previewModal = block.querySelector('.disclosure-preview-modal');
     const previewModalTitle = block.querySelector('#disclosure-modal-title');
@@ -132,14 +129,26 @@ export default async function decorate(block) {
     );
     const closeModalButton = block.querySelector('.disclosure-modal-close');
 
-    // Render the authored page title.
-    if (title && titleContainer) {
-        titleContainer.replaceChildren(title.cloneNode(true));
+    // Extract page name from URL and display it under eyebrow
+    const pathname = window.location.pathname;
+    const pageName = pathname.split('/').filter(Boolean).pop() || '';
+    const formattedPageName = pageName.replace(/-/g, ' ').toUpperCase();
+    console.log({ formattedPageName });
+    if (formattedPageName && pageHeader) {
+        const pageTitle = document.createElement('h1');
+        pageTitle.textContent = formattedPageName;
+        pageHeader.append(pageTitle);
     }
 
-    // Render the authored description.
-    if (description && descriptionContainer) {
-        descriptionContainer.innerHTML = description.innerHTML;
+    // Render the authored page title and description in page-header.
+    if (title && pageHeader) {
+        pageHeader.append(title.cloneNode(true));
+    }
+
+    if (description && pageHeader) {
+        const descParagraph = document.createElement('p');
+        descParagraph.innerHTML = description.innerHTML;
+        pageHeader.append(descParagraph);
     }
 
     // Render the authorable table headings.

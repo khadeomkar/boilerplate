@@ -1,5 +1,4 @@
 .disclosure-library-container {
-  background-color: var(--secondary-background-color);
   margin: 0 !important;
 }
 
@@ -14,31 +13,38 @@
   width: 100%;
 }
 
-.disclosure-library-header {
-  margin-bottom: 24px;
+/* Page Header */
+.page-header {
+  margin-bottom: 28px;
 }
 
-.disclosure-library h2 {
+.eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--highmark-blue);
+    margin: 0 0 6px;
+}
+
+.page-header h1 {
   font-size: 32px;
-  font-weight: 600;
-  margin: 0 0 6px;
-  color: #1a1a1a;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--together-blue);
+  line-height: 1.2;
 }
 
-.disclosure-description {
-  font-size: 16px;
+.page-header p {
+  font-size: 15px;
   line-height: 1.6;
-  color: #666;
-  margin-bottom: 32px;
-}
-
-.disclosure-description p {
+  color: var(--n600);
   margin: 0;
-  padding: 0;
+  max-width: 800px;
 }
 
 /* Toolbar - Search, Filter, and New Button in one line */
-.disclosure-library-toolbar {
+.toolbar {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -46,16 +52,16 @@
 }
 
 /* Search input - first element, flexible width */
-.disclosure-library-search {
+.toolbar-search {
   flex: 1 1 auto;
   min-width: 250px;
 }
 
-.disclosure-library-search label {
+.toolbar-search label {
   display: none;
 }
 
-.disclosure-library-search input {
+.toolbar-search input {
   box-sizing: border-box;
   width: 100%;
   padding: 10px 16px;
@@ -66,18 +72,18 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.disclosure-library-search input:focus {
+.toolbar-search input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.disclosure-library-search input::placeholder {
+.toolbar-search input::placeholder {
   color: #9ca3af;
 }
 
 /* Filter dropdown - second element */
-.disclosure-library-filters {
+.toolbar-filters {
   flex: 0 0 auto;
 }
 
@@ -468,17 +474,17 @@ button.disclosure-copy-button:active {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .disclosure-library-toolbar {
+  .toolbar {
     flex-wrap: wrap;
   }
 
-  .disclosure-library-search {
+  .toolbar-search {
     flex: 1 1 100%;
     max-width: 100%;
     order: 1;
   }
 
-  .disclosure-library-filters {
+  .toolbar-filters {
     order: 2;
   }
 
@@ -497,17 +503,17 @@ button.disclosure-copy-button:active {
     font-size: 24px;
   }
 
-  .disclosure-library-toolbar {
+  .toolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .disclosure-library-search {
+  .toolbar-search {
     width: 100%;
     max-width: 100%;
   }
 
-  .disclosure-library-filters {
+  .toolbar-filters {
     width: 100%;
   }
 
