@@ -129,15 +129,14 @@ export default async function decorate(block) {
     );
     const closeModalButton = block.querySelector('.disclosure-modal-close');
 
-    // Extract page name from URL and display it under eyebrow
+    // Extract page name from URL and display it in eyebrow div
     const pathname = window.location.pathname;
     const pageName = pathname.split('/').filter(Boolean).pop() || '';
     const formattedPageName = pageName.replace(/-/g, ' ').toUpperCase();
-    console.log({ formattedPageName });
-    if (formattedPageName && pageHeader) {
-        const pageTitle = document.createElement('h1');
-        pageTitle.textContent = formattedPageName;
-        pageHeader.append(pageTitle);
+    
+    const eyebrowDiv = block.querySelector('.eyebrow');
+    if (formattedPageName && eyebrowDiv) {
+        eyebrowDiv.textContent = formattedPageName;
     }
 
     // Render the authored page title and description in page-header.
