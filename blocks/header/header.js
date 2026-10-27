@@ -115,46 +115,63 @@ export default async function decorate(block) {
     brandLink.closest('.button-container').className = '';
   }
 
+  // Create sidebar structure with logo
+  const aside = document.createElement('aside');
+  aside.className = 'sidebar';
+  const sidebarTop = document.createElement('div');
+  sidebarTop.className = 'sidebar-top';
+  
+  // Move only the picture tag into sidebar-top
+  if (navBrand) {
+    const picture = navBrand.querySelector('picture');
+    if (picture) {
+      sidebarTop.append(picture);
+    }
+  }
+  
+  aside.append(sidebarTop);
+
+  // Create simplified nav structure
+  const navSection = document.createElement('div');
+  navSection.className = 'nav-section';
+  
+  const navList = document.createElement('ul');
+  navList.className = 'nav-list';
+  navList.id = 'nav-list';
+  
+  // Get nav sections and create nav items - include ALL authored links
   const navSections = nav.querySelector('.nav-sections');
   if (navSections) {
-    navSections.querySelectorAll(':scope .default-content-wrapper > ul > li').forEach((navSection) => {
-      const subList = navSection.querySelector(':scope > ul');
-      if (!subList) return;
-      navSection.classList.add('nav-drop');
-      // wrap the dropdown label in a button so it is announced as expandable
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.setAttribute('aria-expanded', false);
-      [...navSection.childNodes].forEach((node) => {
-        if (node !== subList) button.append(node);
-      });
-      navSection.prepend(button);
-      button.addEventListener('click', () => {
-        const expanded = button.getAttribute('aria-expanded') === 'true';
-        if (isDesktop.matches) {
-          button.focus();
-          toggleAllNavSections(navSections);
-        }
-        button.setAttribute('aria-expanded', !expanded);
-      });
+    // Get all links from the navigation, including nested ones
+    const allLinks = navSections.querySelectorAll('a');
+    allLinks.forEach((link) => {
+      const navItem = document.createElement('li');
+      navItem.className = 'nav-item';
+      
+      const navLink = document.createElement('a');
+      navLink.className = 'nav-link';
+      
+      // Copy href if exists
+      const href = link.getAttribute('href') || '';
+      if (href) {
+        navLink.setAttribute('href', href);
+      }
+      
+      // Extract page name from href or use text content
+      const pageName = href.split('/').pop().replace('.html', '') || link.textContent.toLowerCase().replace(/\s+/g, '');
+      navLink.setAttribute('data-page', pageName);
+      navLink.textContent = link.textContent.trim();
+      
+      navItem.appendChild(navLink);
+      navList.appendChild(navItem);
     });
   }
-
-  // hamburger for mobile
-  const hamburger = document.createElement('div');
-  hamburger.classList.add('nav-hamburger');
-  hamburger.innerHTML = `<button type="button" aria-controls="nav" aria-label="Open navigation">
-      <span class="nav-hamburger-icon"></span>
-    </button>`;
-  hamburger.addEventListener('click', () => toggleMenu(nav, navSections));
-  nav.prepend(hamburger);
-  nav.setAttribute('aria-expanded', 'false');
-  // prevent mobile nav behavior on window resize
-  toggleMenu(nav, navSections, isDesktop.matches);
-  isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
-
+  
+  navSection.appendChild(navList);
+  
   const navWrapper = document.createElement('div');
   navWrapper.className = 'nav-wrapper';
-  navWrapper.append(nav);
+  navWrapper.append(navSection);
+  block.append(aside);
   block.append(navWrapper);
 }
