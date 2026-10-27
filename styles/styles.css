@@ -10,8 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;500;600;700&display=swap');
-
 :root {
   /* colors */
   --background-color: white;
@@ -45,8 +43,8 @@
   --sidebar-w: 272px;
 
   /* fonts */
-  --body-font-family: 'Sofia Sans', sans-serif;
-  --heading-font-family: 'Sofia Sans', sans-serif;
+  --body-font-family: 'Sofia Sans', Arial, Helvetica, sans-serif;
+  --heading-font-family: 'Sofia Sans', Arial, Helvetica, sans-serif;
 
   /* body sizes */
   --body-font-size-m: 22px;
@@ -106,20 +104,41 @@ body {
 }
 
 body.appear {
-  display: block;
+  display: flex;
+  min-height: 100vh;
 }
 
+/* Sidebar Navigation Layout */
 header {
-  height: var(--nav-height);
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--white);
+  border-right: 1px solid var(--n300);
+  overflow-y: auto;
+  z-index: 100;
 }
 
-header .header,
-footer .footer {
+/* Main Content Area */
+main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  width: calc(100% - var(--sidebar-w));
+  min-height: 100vh;
+}
+
+/* Footer removed as per requirements */
+footer {
+  display: none;
+}
+
+header .header {
   visibility: hidden;
 }
 
-header .header[data-block-status="loaded"],
-footer .footer[data-block-status="loaded"] {
+header .header[data-block-status="loaded"] {
   visibility: visible;
 }
 
@@ -168,7 +187,8 @@ pre {
 }
 
 main > div {
-  margin: 40px 16px;
+  margin: 0;
+  padding: 40px 32px;
 }
 
 input,
@@ -322,13 +342,13 @@ main img {
 
 /* sections */
 main > .section {
-  margin: 40px 0;
+  margin: 0;
 }
 
 main > .section > div {
-  max-width: 1200px;
-  margin: auto;
-  padding: 0 24px;
+  max-width: 100%;
+  margin: 0;
+  padding: 40px 32px;
 }
 
 main > .section:first-of-type {
@@ -337,7 +357,7 @@ main > .section:first-of-type {
 
 @media (width >= 900px) {
   main > .section > div {
-    padding: 0 32px;
+    padding: 40px 48px;
   }
 }
 
