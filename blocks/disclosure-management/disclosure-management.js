@@ -491,14 +491,18 @@ export default async function decorate(block) {
             return button;
         }
 
-        if (totalPages > 1) {
-            controls.append(
-                createButton(
-                    'Previous',
-                    currentPage - 1,
-                    currentPage === 1,
-                ),
-            );
+        // Always show pagination controls, even for single page
+        if (totalPages >= 1) {
+            // Only show Previous/Next buttons if there are multiple pages
+            if (totalPages > 1) {
+                controls.append(
+                    createButton(
+                        'Previous',
+                        currentPage - 1,
+                        currentPage === 1,
+                    ),
+                );
+            }
 
             for (let page = 1; page <= totalPages; page += 1) {
                 controls.append(
@@ -511,13 +515,16 @@ export default async function decorate(block) {
                 );
             }
 
-            controls.append(
-                createButton(
-                    'Next',
-                    currentPage + 1,
-                    currentPage === totalPages,
-                ),
-            );
+            // Only show Previous/Next buttons if there are multiple pages
+            if (totalPages > 1) {
+                controls.append(
+                    createButton(
+                        'Next',
+                        currentPage + 1,
+                        currentPage === totalPages,
+                    ),
+                );
+            }
         }
 
         message.textContent = totalRecords

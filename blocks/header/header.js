@@ -250,5 +250,57 @@ export default async function decorate(block) {
   
   navSection.appendChild(navList);
   aside.append(navSection);
+
+  // Process Quick Links section (3rd section)
+  const navTools = nav.querySelector('.nav-tools');
+  
+  if (navTools) {
+    // Create divider before quick links
+    const quickLinksDivider = document.createElement('div');
+    quickLinksDivider.className = 'sidebar-divider';
+    aside.append(quickLinksDivider);
+
+    // Create quick links section
+    const quickLinksSection = document.createElement('div');
+    quickLinksSection.className = 'quick-links-section';
+    
+    // Get the section title (if any)
+    const sectionTitle = navTools.querySelector('h1, h2, h3, h4, h5, h6, p:first-child, strong');
+    if (sectionTitle) {
+      const titleElement = document.createElement('h3');
+      titleElement.className = 'quick-links-label';
+      titleElement.textContent = sectionTitle.textContent.trim();
+      quickLinksSection.appendChild(titleElement);
+    }
+    
+    // Create quick links list
+    const quickLinksList = document.createElement('ul');
+    quickLinksList.className = 'quick-links-list';
+    
+    // Get all links from the tools section
+    const toolLinks = navTools.querySelectorAll('a');
+    
+    toolLinks.forEach((link) => {
+      const quickLinkItem = document.createElement('li');
+      quickLinkItem.className = 'quick-link-item';
+      
+      const quickLink = document.createElement('a');
+      quickLink.className = 'quick-link';
+      
+      const href = link.getAttribute('href') || '';
+      if (href) {
+        quickLink.setAttribute('href', href);
+      }
+      
+      quickLink.textContent = link.textContent.trim();
+      
+      quickLinkItem.appendChild(quickLink);
+      quickLinksList.appendChild(quickLinkItem);
+    });
+    
+    quickLinksSection.appendChild(quickLinksList);
+    aside.append(quickLinksSection);
+  }
+  
   block.append(aside);
 }

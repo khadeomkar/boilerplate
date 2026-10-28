@@ -102,53 +102,44 @@ a.nav-link svg {
 
 /* Quick Links Section */
 .quick-links-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--highmark-blue);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--n600);
-  margin: 24px 12px 12px 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--n300);
+  padding: 18px 20px 8px;
 }
 
-.quick-link {
+.quick-links-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.quick-link-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  margin: 0 12px 2px 12px;
-  border-radius: 6px;
-  color: var(--n700);
+  padding: 10px 20px;
+  color: var(--black);
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 13px;
+}
+
+a.quick-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 10px;
+  color: var(--black);
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
 }
 
 .quick-link:hover {
   background-color: var(--n200);
-  color: var(--together-blue);
-}
-
-.ql-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ql-left svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  flex-shrink: 0;
-}
-
-.quick-link svg.chev {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  opacity: 0.5;
 }
 
 /* Spacer */
