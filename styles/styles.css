@@ -43,8 +43,8 @@
   --sidebar-w: 272px;
 
   /* fonts */
-  --body-font-family: 'Sofia Sans', Arial, Helvetica, sans-serif;
-  --heading-font-family: 'Sofia Sans', Arial, Helvetica, sans-serif;
+  --body-font-family: 'Sofia Sans', 'roboto', Arial, Helvetica, sans-serif;
+  --heading-font-family: 'Sofia Sans', 'roboto', Arial, Helvetica, sans-serif;
 
   /* body sizes */
   --body-font-size-m: 22px;
@@ -101,6 +101,7 @@ body {
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-m);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 body.appear {
@@ -113,12 +114,6 @@ header {
   position: fixed;
   left: 0;
   top: 0;
-  width: var(--sidebar-w);
-  height: 100vh;
-  background: var(--white);
-  border-right: 1px solid var(--n300);
-  overflow-y: auto;
-  z-index: 100;
 }
 
 /* Main Content Area */
@@ -184,11 +179,6 @@ pre {
   background-color: var(--light-color);
   overflow-x: auto;
   white-space: pre;
-}
-
-main > div {
-  margin: 0;
-  padding: 40px 32px;
 }
 
 input,
@@ -348,17 +338,11 @@ main > .section {
 main > .section > div {
   max-width: 100%;
   margin: 0;
-  padding: 40px 32px;
+  padding: 32px 40px 64px;
 }
 
 main > .section:first-of-type {
   margin-top: 0;
-}
-
-@media (width >= 900px) {
-  main > .section > div {
-    padding: 40px 48px;
-  }
 }
 
 /* section metadata */

@@ -131,6 +131,11 @@ export default async function decorate(block) {
   
   aside.append(sidebarTop);
 
+  // Create divider after logo
+  const divider = document.createElement('div');
+  divider.className = 'sidebar-divider';
+  aside.append(divider);
+
   // Create simplified nav structure
   const navSection = document.createElement('div');
   navSection.className = 'nav-section';
@@ -139,12 +144,83 @@ export default async function decorate(block) {
   navList.className = 'nav-list';
   navList.id = 'nav-list';
   
+  // Get current page URL for active state
+  const currentPath = window.location.pathname;
+  
   // Get nav sections and create nav items - include ALL authored links
   const navSections = nav.querySelector('.nav-sections');
+  
   if (navSections) {
     // Get all links from the navigation, including nested ones
     const allLinks = navSections.querySelectorAll('a');
-    allLinks.forEach((link) => {
+    
+    if (allLinks.length === 0) {
+      // If no links found, try to get all list items
+      const listItems = navSections.querySelectorAll('li');
+      
+      listItems.forEach((item) => {
+        const navItem = document.createElement('li');
+        navItem.className = 'nav-item';
+        
+        const navLink = document.createElement('a');
+        navLink.className = 'nav-link';
+        
+        // Get text content from list item
+        const textContent = item.textContent.trim();
+        navLink.textContent = textContent;
+        
+        // Check if there's a link inside
+        const link = item.querySelector('a');
+        if (link) {
+          const href = link.getAttribute('href') || '';
+          if (href) {
+            navLink.setAttribute('href', href);
+          }
+          const pageName = href.split('/').pop().replace('.html', '') || textContent.toLowerCase().replace(/\s+/g, '');
+          navLink.setAttribute('data-page', pageName);
+          
+          // Check if this link matches the current page
+          if (href === currentPath || currentPath.endsWith(href)) {
+            navLink.classList.add('active');
+          }
+        }
+        
+        navItem.appendChild(navLink);
+        navList.appendChild(navItem);
+      });
+    } else {
+      allLinks.forEach((link) => {
+        const navItem = document.createElement('li');
+        navItem.className = 'nav-item';
+        
+        const navLink = document.createElement('a');
+        navLink.className = 'nav-link';
+        
+        // Copy href if exists
+        const href = link.getAttribute('href') || '';
+        if (href) {
+          navLink.setAttribute('href', href);
+        }
+        
+        // Extract page name from href or use text content
+        const pageName = href.split('/').pop().replace('.html', '') || link.textContent.toLowerCase().replace(/\s+/g, '');
+        navLink.setAttribute('data-page', pageName);
+        navLink.textContent = link.textContent.trim();
+        
+        // Check if this link matches the current page
+        if (href === currentPath || currentPath.endsWith(href) || (href !== '' && currentPath.includes(href))) {
+          navLink.classList.add('active');
+        }
+        
+        navItem.appendChild(navLink);
+        navList.appendChild(navItem);
+      });
+    }
+  } else {
+    // Try to find links directly in nav
+    const directLinks = nav.querySelectorAll('a');
+    
+    directLinks.forEach((link) => {
       const navItem = document.createElement('li');
       navItem.className = 'nav-item';
       
@@ -162,16 +238,17 @@ export default async function decorate(block) {
       navLink.setAttribute('data-page', pageName);
       navLink.textContent = link.textContent.trim();
       
+      // Check if this link matches the current page
+      if (href === currentPath || currentPath.endsWith(href) || (href !== '' && currentPath.includes(href))) {
+        navLink.classList.add('active');
+      }
+      
       navItem.appendChild(navLink);
       navList.appendChild(navItem);
     });
   }
   
   navSection.appendChild(navList);
-  
-  const navWrapper = document.createElement('div');
-  navWrapper.className = 'nav-wrapper';
-  navWrapper.append(navSection);
+  aside.append(navSection);
   block.append(aside);
-  block.append(navWrapper);
 }
