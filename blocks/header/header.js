@@ -301,6 +301,49 @@ export default async function decorate(block) {
     quickLinksSection.appendChild(quickLinksList);
     aside.append(quickLinksSection);
   }
+
+  // Create user section at the bottom
+  const userSection = document.createElement('div');
+  userSection.className = 'sidebar-user';
+  
+  // Create avatar
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar-icon';
+  
+  // Add avatar image or initials
+  const avatarImg = document.createElement('img');
+  avatarImg.src = 'https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/user-round.svg';
+  avatarImg.alt = 'User Avatar';
+  avatarImg.style.width = '100%';
+  avatarImg.style.height = '100%';
+  avatarImg.style.borderRadius = '50%';
+  avatarImg.style.objectFit = 'cover';
+  avatar.appendChild(avatarImg);
+  
+  // Create user info container
+  const userInfo = document.createElement('div');
+  userInfo.className = 'user-info';
+  
+  // Create name element
+  const userName = document.createElement('div');
+  userName.className = 'name';
+  userName.textContent = 'Kagome Inyu';
+  
+  // Create role element
+  const userRole = document.createElement('div');
+  userRole.className = 'role';
+  userRole.textContent = 'Campaign Owner';
+  
+  // Append name and role to user info
+  userInfo.appendChild(userName);
+  userInfo.appendChild(userRole);
+  
+  // Append avatar and user info to user section
+  userSection.appendChild(avatar);
+  userSection.appendChild(userInfo);
+  
+  // Append user section to sidebar
+  aside.append(userSection);
   
   block.append(aside);
 }
