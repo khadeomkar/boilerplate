@@ -52,6 +52,7 @@
 
 /* Search input - first element, flexible width */
 .toolbar-search {
+  position: relative;
   flex: 1 1 auto;
   min-width: 250px;
 }
@@ -60,10 +61,22 @@
   display: none;
 }
 
+.toolbar-search .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  fill: #6b7280;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .toolbar-search input {
   box-sizing: border-box;
   width: 100%;
-  padding: 10px 16px;
+  padding: 10px 16px 10px 40px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
@@ -107,29 +120,6 @@
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-/* New button - third element */
-.disclosure-new-button {
-  padding: 10px 20px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
-
-.disclosure-new-button:hover {
-  background: #1d4ed8;
-}
-
-.disclosure-new-button:active {
-  transform: scale(0.98);
 }
 
 /* Table styling */
@@ -300,28 +290,27 @@ button.disclosure-copy-button:active {
 
 .disclosure-record-count {
   margin: 0;
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 13.5px;
+  color: var(--n600);
   flex-shrink: 0;
 }
 
 .disclosure-pagination-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .disclosure-pagination-controls button {
-  min-width: 36px;
-  height: 36px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #fff;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 500;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--n300);
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--n700);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -332,14 +321,14 @@ button.disclosure-copy-button:active {
 }
 
 .disclosure-pagination-controls button.is-active {
-  background: #2563eb;
-  color: #fff;
-  border-color: #2563eb;
+  background: var(--together-blue);
+  color: var(--white);
+  border-color: var(--together-blue);
 }
 
 .disclosure-pagination-controls button.is-active:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: #00294A;
+  border-color: #00294A;
 }
 
 .disclosure-pagination-controls button:disabled {
@@ -469,111 +458,4 @@ button.disclosure-copy-button:active {
   font-size: 14px;
   color: #374151;
   border: 1px solid #e5e7eb;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .toolbar {
-    flex-wrap: wrap;
-  }
-
-  .toolbar-search {
-    flex: 1 1 100%;
-    max-width: 100%;
-    order: 1;
-  }
-
-  .toolbar-filters {
-    order: 2;
-  }
-
-  .disclosure-new-button {
-    order: 3;
-  }
-}
-
-@media (max-width: 768px) {
-  #page-disclosure {
-    padding: 24px 16px;
-  }
-
-  .disclosure-library h1,
-  .disclosure-library h2 {
-    font-size: 24px;
-  }
-
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .toolbar-search {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .toolbar-filters {
-    width: 100%;
-  }
-
-  .disclosure-filter-select {
-    width: 100%;
-  }
-
-  .disclosure-new-button {
-    width: 100%;
-  }
-
-  .disclosure-library th,
-  .disclosure-library td {
-    padding: 12px 8px;
-    font-size: 13px;
-  }
-
-  .disclosure-preview-modal {
-    width: calc(100% - 24px);
-    max-height: 90vh;
-  }
-
-  .disclosure-preview-modal-header {
-    padding: 20px;
-  }
-
-  .disclosure-preview-modal-header h2 {
-    font-size: 20px;
-  }
-
-  .disclosure-preview-modal-content {
-    padding: 20px;
-  }
-
-  .disclosure-pagination {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .disclosure-pagination-controls {
-    width: 100%;
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 480px) {
-  .disclosure-library th,
-  .disclosure-library td {
-    padding: 10px 6px;
-    font-size: 12px;
-  }
-
-  .disclosure-preview-button {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .disclosure-pagination-controls button {
-    min-width: 32px;
-    height: 32px;
-    padding: 6px 10px;
-    font-size: 13px;
-  }
 }

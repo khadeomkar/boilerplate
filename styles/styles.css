@@ -313,6 +313,28 @@ button.button.accent:disabled:focus-visible {
   color: var(--dark-color);
 }
 
+.btn-primary {
+  background: var(--together-blue);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  background: #00294A;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
 main img {
   max-width: 100%;
   width: auto;

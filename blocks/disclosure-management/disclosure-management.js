@@ -58,6 +58,12 @@ export default async function decorate(block) {
         <div class="toolbar">
           <div class="toolbar-search">
             <label for="disclosure-search"></label>
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+              <path d="M16.9,15.5c2.4-3.2,2.2-7.7-0.7-10.6c-3.1-3.1-8.1-3.1-11.3,0c-3.1,3.2-3.1,8.3,0,11.4
+                c2.9,2.9,7.5,3.1,10.6,0.6c0,0.1,0,0.1,0,0.1l4.2,4.2c0.5,0.4,1.1,0.4,1.5,0c0.4-0.4,0.4-1,0-1.4L16.9,15.5
+                C16.9,15.5,16.9,15.5,16.9,15.5L16.9,15.5z M14.8,6.3c2.3,2.3,2.3,6.1,0,8.5c-2.3,2.3-6.1,2.3-8.5,0C4,12.5,4,8.7,6.3,6.3
+                C8.7,4,12.5,4,14.8,6.3z"/>
+            </svg>
             <input
               id="disclosure-search"
               type="search"
@@ -74,7 +80,7 @@ export default async function decorate(block) {
             </select>
           </div>
           
-          <button type="button" class="disclosure-new-button">+ New Disclosure</button>
+          <button type="button" class="disclosure-new-button btn-primary">+ New Disclosure</button>
         </div>
 
         <div class="disclosure-library-table-wrapper">
@@ -491,19 +497,8 @@ export default async function decorate(block) {
             return button;
         }
 
-        // Always show pagination controls, even for single page
+        // Show pagination controls with numbered page buttons only
         if (totalPages >= 1) {
-            // Only show Previous/Next buttons if there are multiple pages
-            if (totalPages > 1) {
-                controls.append(
-                    createButton(
-                        'Previous',
-                        currentPage - 1,
-                        currentPage === 1,
-                    ),
-                );
-            }
-
             for (let page = 1; page <= totalPages; page += 1) {
                 controls.append(
                     createButton(
@@ -511,17 +506,6 @@ export default async function decorate(block) {
                         page,
                         false,
                         page === currentPage,
-                    ),
-                );
-            }
-
-            // Only show Previous/Next buttons if there are multiple pages
-            if (totalPages > 1) {
-                controls.append(
-                    createButton(
-                        'Next',
-                        currentPage + 1,
-                        currentPage === totalPages,
                     ),
                 );
             }
