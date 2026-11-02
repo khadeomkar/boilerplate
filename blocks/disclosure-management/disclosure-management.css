@@ -36,7 +36,7 @@
 
 .page-header p {
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 15px;
   color: var(--n600);
   margin: 0;
   max-width: 800px;
@@ -138,23 +138,24 @@
 }
 
 .disclosure-library th {
-  padding: 14px 16px;
-  background: #F5F5FA;
-  font-weight: 600;
-  font-size: 13px;
-  color: #4A4A68;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  border-bottom: 1px solid #E8E8F0;
+  background: var(--n200);
+  text-align: left;
+  text-transform: capitalize;
+  font-size: 12.5px;
+  line-height: 12.5px;
+  font-weight: 700;
+  color: var(--n700);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--n300);
   white-space: nowrap;
 }
 
 .disclosure-library td {
-  padding: 16px;
-  border-bottom: 1px solid #F5F5FA;
+  padding: 12px 14px;
+  color: var(--black);
+  border-bottom: 1px solid var(--n200);
   vertical-align: middle;
   font-size: 14px;
-  color: #1A1A1E;
 }
 
 .disclosure-library tbody tr:last-child td {
@@ -236,23 +237,23 @@
 
 /* Short code with copy button - both in same box */
 .disclosure-shortcode-wrapper {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   min-width: 0;
-  background: #f3f4f6;
-  border: 1px solid #E8E8F0;
+  background: var(--n200);
+  border: 1px solid var(--n300);
   border-radius: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 5px 9px;
 }
 
 .disclosure-shortcode-wrapper code {
   flex: 1;
+  font-family: 'Courier New', monospace;
   font-size: 12px;
+  color: var(--n800);
   line-height: 12px;
-  color: #374151;
   white-space: normal;
   word-break: break-word;
 }
@@ -343,7 +344,7 @@ button.disclosure-copy-button:active {
 
 
 /* Preview Modal */
-.disclosure-preview-modal {
+.modal {
   position: fixed;
   inset: 0;
   width: min(700px, calc(100% - 32px));
@@ -359,38 +360,37 @@ button.disclosure-copy-button:active {
   overflow: hidden;
 }
 
-.disclosure-preview-modal::backdrop {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+.modal::backdrop {
+      background: rgba(26, 26, 46, 0.55);
+      padding: 48px 20px;
 }
 
-.disclosure-preview-modal-header {
+.modal-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
-  padding: 24px 28px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  gap: 16px;
+  padding: 22px 26px 16px;
+  border-bottom: 1px solid var(--n300);
 }
 
-.disclosure-preview-modal-heading {
+.modal-heading {
   flex: 1;
   min-width: 0;
 }
 
-.disclosure-preview-modal-header h2 {
-  margin: 0 0 8px;
-  font-size: 24px;
-  font-weight: 600;
-  color: #111827;
+.modal-head h3 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--together-blue);
+  margin: 0 0 4px;
 }
 
 .disclosure-preview-updated {
   margin: 0;
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.5;
+  font-size: 12.5px;
+  color: var(--n600);
+  line-height: 12.5px;
 }
 
 .disclosure-modal-close {
@@ -401,7 +401,7 @@ button.disclosure-copy-button:active {
   border-radius: 6px;
   background: transparent;
   color: #6b7280;
-  font-size: 24px;
+  font-size: 40px;
   font-weight: 300;
   line-height: 1;
   cursor: pointer;
@@ -420,42 +420,31 @@ button.disclosure-copy-button:active {
   transform: scale(0.95);
 }
 
-.disclosure-preview-modal-content {
-  padding: 28px;
-  overflow-y: auto;
+.modal-body {
   max-height: calc(85vh - 100px);
-}
-
-.disclosure-preview-modal-content h3 {
-  margin: 0 0 12px;
+  padding: 20px 26px 26px;
+  overflow-y: auto;
   font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--black);
+  line-height: 1.6;
 }
 
-.disclosure-preview-modal-content p {
-  margin: 0 0 24px;
-  line-height: 1.7;
-  color: #4b5563;
-}
-
-.disclosure-preview-text {
-  background: #f9fafb;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+.modal-body h4 {
+  margin: 18px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
 }
 
 .disclosure-preview-shortcode {
-  background: #f3f4f6;
-  padding: 12px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--n200);
+  border: 1px solid var(--n300);
   border-radius: 6px;
+  padding: 5px 9px;
   font-family: 'Courier New', monospace;
-  font-size: 14px;
-  color: #374151;
-  border: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: var(--n800);
 }

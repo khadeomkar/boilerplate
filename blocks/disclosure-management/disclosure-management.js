@@ -100,12 +100,12 @@ export default async function decorate(block) {
         ></p>
 
         <dialog
-          class="disclosure-preview-modal"
-          aria-labelledby="disclosure-modal-title"
+          class="modal"
+          aria-labelledby="modal-title"
         >
-          <div class="disclosure-preview-modal-header">
-            <div class="disclosure-preview-modal-heading">
-                <h2 id="disclosure-modal-title">Disclosure Preview</h2>
+          <div class="modal-head">
+            <div class="modal-heading">
+                <h3 id="modal-title">Disclosure Preview</h3>
                 <p class="disclosure-preview-updated"></p>
             </div>
 
@@ -118,20 +118,20 @@ export default async function decorate(block) {
             </button>
           </div>
 
-          <div class="disclosure-preview-modal-content"></div>
+          <div class="modal-body"></div>
         </dialog>
       </section>
     `;
 
     const pageHeader = block.querySelector('.page-header');
     const headerRow = block.querySelector('.disclosure-table-header');
-    const previewModal = block.querySelector('.disclosure-preview-modal');
-    const previewModalTitle = block.querySelector('#disclosure-modal-title');
+    const previewModal = block.querySelector('.modal');
+    const previewModalTitle = block.querySelector('#modal-title');
     const previewModalUpdated = block.querySelector(
         '.disclosure-preview-updated',
     );
     const previewModalContent = block.querySelector(
-        '.disclosure-preview-modal-content',
+        '.modal-body',
     );
     const closeModalButton = block.querySelector('.disclosure-modal-close');
 
@@ -352,7 +352,7 @@ export default async function decorate(block) {
                 ].filter(Boolean).join(' ');
 
                 // Disclosure Text label.
-                const disclosureLabel = document.createElement('h3');
+                const disclosureLabel = document.createElement('h4');
                 disclosureLabel.textContent = 'Disclosure Text';
                 previewModalContent.append(disclosureLabel);
 
@@ -363,7 +363,7 @@ export default async function decorate(block) {
                 previewModalContent.append(disclosureText);
 
                 // Short Code label.
-                const shortCodeLabel = document.createElement('h3');
+                const shortCodeLabel = document.createElement('h4');
                 shortCodeLabel.textContent = 'Short Code';
                 previewModalContent.append(shortCodeLabel);
 
