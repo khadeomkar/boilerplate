@@ -82,7 +82,7 @@ a.nav-link:hover {
 }
 
 a.nav-link.active {
-    background: #E4F4FC;
+    background: var(--n1000);
     color: var(--highmark-blue);
     font-weight: 600;
 }

@@ -68,7 +68,7 @@
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  fill: #6b7280;
+  fill: var(--n600);
   pointer-events: none;
   z-index: 1;
 }
@@ -76,8 +76,9 @@
 .toolbar-search input {
   box-sizing: border-box;
   width: 100%;
-  padding: 10px 16px 10px 40px;
-  border: 1px solid #d1d5db;
+  padding: 7px 16px 7px 40px;
+  border: 1px solid var(--n400);
+  color: var(--black);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -86,12 +87,11 @@
 
 .toolbar-search input:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--highmark-blue);
 }
 
 .toolbar-search input::placeholder {
-  color: #9ca3af;
+  color: var(--n600);
 }
 
 /* Filter dropdown - second element */
@@ -100,35 +100,28 @@
 }
 
 .disclosure-filter-select {
-  padding: 13px 16px;
-  border: 1px solid #d1d5db;
+  padding: 10px 16px;
+  border: 1px solid var(--n400);
   border-radius: 6px;
-  background: #fff;
-  color: #374151;
+  background: var(--white);
+  color: var(--black);
   font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   min-width: 150px;
 }
 
-.disclosure-filter-select:hover {
-  border-color: #9ca3af;
-}
-
 .disclosure-filter-select:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--highmark-blue);
 }
 
 /* Table styling */
 .disclosure-library-table-wrapper {
   overflow-x: auto;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--n300);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: var(--white);
 }
 
 .disclosure-library table {
@@ -163,11 +156,7 @@
 }
 
 .disclosure-library tbody tr:nth-child(even) {
-    background: #F5F5FA;;
-}
-
-.disclosure-library tbody tr:hover {
-  background-color: #f9fafb;
+    background: var(--n200);
 }
 
 .disclosure-library code {
@@ -178,10 +167,10 @@
 .disclosure-library-message {
   margin-top: 20px;
   padding: 12px 16px;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  background: var(--n1000);
+  border: 1px solid var(--highmark-blue);
   border-radius: 6px;
-  color: #0c4a6e;
+  color: var(--together-blue);
   font-size: 14px;
 }
 
@@ -197,10 +186,10 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--n400);
   border-radius: 6px;
-  background: #fff;
-  color: #374151;
+  background: var(--white);
+  color: var(--n700);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -220,8 +209,7 @@
 }
 
 .disclosure-preview-button:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: var(--n200);
 }
 
 .disclosure-preview-button:active {
@@ -264,15 +252,10 @@ button.disclosure-copy-button {
   border: none;
   padding: 6px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--together-blue);;
   transition: color 0.2s ease, background-color 0.2s ease;
   border-radius: 4px;
   line-height: 0;
-}
-
-button.disclosure-copy-button:hover {
-  color: #2563eb;
-  background: #f3f4f6;
 }
 
 button.disclosure-copy-button:active {
@@ -316,26 +299,16 @@ button.disclosure-copy-button:active {
   transition: all 0.2s ease;
 }
 
-.disclosure-pagination-controls button:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
 .disclosure-pagination-controls button.is-active {
   background: var(--together-blue);
   color: var(--white);
   border-color: var(--together-blue);
 }
 
-.disclosure-pagination-controls button.is-active:hover {
-  background: #00294A;
-  border-color: #00294A;
-}
-
 .disclosure-pagination-controls button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  background: #f9fafb;
+  background: var(--n300);
 }
 
 .disclosure-pagination-controls button:active:not(:disabled) {
@@ -366,8 +339,8 @@ button.disclosure-copy-button:active {
   padding: 0;
   border: none;
   border-radius: 12px;
-  background: #fff;
-  color: #1f2937;
+  background: var(--white);
+  color: var(--black);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
@@ -412,7 +385,7 @@ button.disclosure-copy-button:active {
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #6b7280;
+  color: var(--n600);
   font-size: 40px;
   font-weight: 300;
   line-height: 1;
@@ -421,11 +394,6 @@ button.disclosure-copy-button:active {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.disclosure-modal-close:hover {
-  background: #e5e7eb;
-  color: #111827;
 }
 
 .disclosure-modal-close:active {
