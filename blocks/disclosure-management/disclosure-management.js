@@ -1,6 +1,7 @@
 
 const API_URL = 'https://api.npoint.io/5665eb6d83150e73c4cf';
 const PAGE_SIZE = 10;
+const maxVisiblePages = 5;
 
 export default async function decorate(block) {
     // Preserve content authored in EDS.
@@ -73,7 +74,7 @@ export default async function decorate(block) {
           
           <div class="toolbar-filters">
             <select id="product-line-filter" class="disclosure-filter-select">
-              <option value="">All Product Lines</option>
+              <option value="">Line of Business</option>
               <option value="">Commercial</option>
               <option value="">Dental</option>
               <option value="">Vision</option>
@@ -497,18 +498,68 @@ export default async function decorate(block) {
             return button;
         }
 
-        // Show pagination controls with numbered page buttons only
+        // Show pagination controls with ellipsis for large page counts
         if (totalPages >= 1) {
-            for (let page = 1; page <= totalPages; page += 1) {
-                controls.append(
-                    createButton(
-                        String(page),
-                        page,
-                        false,
-                        page === currentPage,
-                    ),
-                );
+            const pages = [];
+
+            if (totalPages <= maxVisiblePages + 2) {
+                // Show all pages if total pages is small
+                for (let i = 1; i <= totalPages; i += 1) {
+                    pages.push(i);
+                }
+            } else {
+                // Always show first page
+                pages.push(1);
+
+                // Calculate range around current page
+                let startPage = Math.max(2, currentPage - 1);
+                let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+                // Adjust range to show more pages when near start or end
+                if (currentPage <= 3) {
+                    endPage = Math.min(maxVisiblePages, totalPages - 1);
+                } else if (currentPage >= totalPages - 2) {
+                    startPage = Math.max(2, totalPages - maxVisiblePages + 1);
+                }
+
+                // Add ellipsis before middle pages if needed
+                if (startPage > 2) {
+                    pages.push('...');
+                }
+
+                // Add middle pages
+                for (let i = startPage; i <= endPage; i += 1) {
+                    pages.push(i);
+                }
+
+                // Add ellipsis after middle pages if needed
+                if (endPage < totalPages - 1) {
+                    pages.push('...');
+                }
+
+                // Always show last page
+                pages.push(totalPages);
             }
+
+            // Render pagination buttons
+            pages.forEach((page) => {
+                if (page === '...') {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'pagination-ellipsis';
+                    ellipsis.textContent = '...';
+                    ellipsis.setAttribute('aria-hidden', 'true');
+                    controls.append(ellipsis);
+                } else {
+                    controls.append(
+                        createButton(
+                            String(page),
+                            page,
+                            false,
+                            page === currentPage,
+                        ),
+                    );
+                }
+            });
         }
 
         message.textContent = totalRecords
