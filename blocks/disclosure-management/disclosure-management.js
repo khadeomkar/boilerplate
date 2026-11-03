@@ -1,5 +1,5 @@
 
-const API_URL = 'https://api.npoint.io/5665eb6d83150e73c4cf';
+const API_URL = 'https://publish-p24773-e1522172.adobeaemcloud.com/graphql/execute.json/disclaimer/disclaimer';
 const PAGE_SIZE = 10;
 
 export default async function decorate(block) {
