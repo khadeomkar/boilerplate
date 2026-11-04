@@ -371,7 +371,11 @@ export default async function decorate(block) {
             // Last Updated.
             const updatedCell = document.createElement('td');
             updatedCell.textContent = item.lastUpdated
-                ? new Date(item.lastUpdated).toLocaleDateString('en-GB')
+                ? new Date(item.lastUpdated).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                })
                 : '';
             row.append(updatedCell);
 
