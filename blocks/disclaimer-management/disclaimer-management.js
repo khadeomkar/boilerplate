@@ -1,5 +1,5 @@
 
-const API_URL = 'https://api.npoint.io/5665eb6d83150e73c4cf';
+const API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-limit%3Boffset%3D0%3Blimit%3D10%3B';
 const PAGE_SIZE = 10;
 const maxVisiblePages = 5;
 
@@ -14,7 +14,7 @@ export default async function decorate(block) {
 
     // Default values for authorable settings.
     const defaultSettings = {
-        'search title': 'Search disclosures',
+        'search title': 'Search disclaimers',
         'search placeholder': 'Search by name, short code, or updated by',
         'preview button text': 'preview',
     };
@@ -49,16 +49,16 @@ export default async function decorate(block) {
         .map((cell) => cell.textContent.trim())
         .filter(Boolean);
 
-    // Build the Disclosure Library UI.
+    // Build the disclaimer Library UI.
     block.innerHTML = `
-      <section id="page-disclosure" class="disclosure-library">
+      <section id="page-disclaimer" class="disclaimer-library">
         <div class="page-header">
-          <div class="eyebrow">Disclosure Management</div>
+          <div class="eyebrow">Disclaimer Management</div>
         </div>
 
         <div class="toolbar">
           <div class="toolbar-search">
-            <label for="disclosure-search"></label>
+            <label for="disclaimer-search"></label>
             <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
               <path d="M16.9,15.5c2.4-3.2,2.2-7.7-0.7-10.6c-3.1-3.1-8.1-3.1-11.3,0c-3.1,3.2-3.1,8.3,0,11.4
                 c2.9,2.9,7.5,3.1,10.6,0.6c0,0.1,0,0.1,0,0.1l4.2,4.2c0.5,0.4,1.1,0.4,1.5,0c0.4-0.4,0.4-1,0-1.4L16.9,15.5
@@ -66,7 +66,7 @@ export default async function decorate(block) {
                 C8.7,4,12.5,4,14.8,6.3z"/>
             </svg>
             <input
-              id="disclosure-search"
+              id="disclaimer-search"
               type="search"
               placeholder=""
             />
@@ -80,7 +80,7 @@ export default async function decorate(block) {
           </div>
           
           <div class="toolbar-filters">
-            <select id="product-line-filter" class="disclosure-filter-select">
+            <select id="product-line-filter" class="disclaimer-filter-select">
               <option value="">Line of Business</option>
               <option value="">Commercial</option>
               <option value="">Dental</option>
@@ -88,7 +88,7 @@ export default async function decorate(block) {
             </select>
           </div>
           
-          <button type="button" class="disclosure-new-button btn-primary">+ New Disclosure</button>
+          <button type="button" class="disclaimer-new-button btn-primary">+ New disclaimer</button>
         </div>
 
         <div class="more-filters-toggle">
@@ -104,7 +104,7 @@ export default async function decorate(block) {
           <div class="more-filters-grid">
             <div class="filter-group">
               <label for="state-filter">State</label>
-              <select id="state-filter" class="disclosure-filter-select">
+              <select id="state-filter" class="disclaimer-filter-select">
                 <option value="">Select State</option>
                 <option value="CA">California</option>
                 <option value="NY">New York</option>
@@ -115,7 +115,7 @@ export default async function decorate(block) {
 
             <div class="filter-group">
               <label for="region-filter">Region</label>
-              <select id="region-filter" class="disclosure-filter-select">
+              <select id="region-filter" class="disclaimer-filter-select">
                 <option value="">Select Region</option>
                 <option value="northeast">Northeast</option>
                 <option value="southeast">Southeast</option>
@@ -145,19 +145,19 @@ export default async function decorate(block) {
           </div>
         </div>
 
-        <div class="disclosure-library-table-wrapper">
+        <div class="disclaimer-library-table-wrapper">
           <table>
             <thead>
-              <tr class="disclosure-table-header"></tr>
+              <tr class="disclaimer-table-header"></tr>
             </thead>
             <tbody></tbody>
           </table>
         </div>
 
-        <div class="disclosure-pagination"></div>
+        <div class="disclaimer-pagination"></div>
 
         <p
-          class="disclosure-library-message"
+          class="disclaimer-library-message"
           aria-live="polite"
         ></p>
 
@@ -167,13 +167,13 @@ export default async function decorate(block) {
         >
           <div class="modal-head">
             <div class="modal-heading">
-                <h3 id="modal-title">Disclosure Preview</h3>
-                <p class="disclosure-preview-updated"></p>
+                <h3 id="modal-title">disclaimer Preview</h3>
+                <p class="disclaimer-preview-updated"></p>
             </div>
 
             <button
               type="button"
-              class="disclosure-modal-close"
+              class="disclaimer-modal-close"
               aria-label="Close preview"
             >
               &times;
@@ -186,16 +186,16 @@ export default async function decorate(block) {
     `;
 
     const pageHeader = block.querySelector('.page-header');
-    const headerRow = block.querySelector('.disclosure-table-header');
+    const headerRow = block.querySelector('.disclaimer-table-header');
     const previewModal = block.querySelector('.modal');
     const previewModalTitle = block.querySelector('#modal-title');
     const previewModalUpdated = block.querySelector(
-        '.disclosure-preview-updated',
+        '.disclaimer-preview-updated',
     );
     const previewModalContent = block.querySelector(
         '.modal-body',
     );
-    const closeModalButton = block.querySelector('.disclosure-modal-close');
+    const closeModalButton = block.querySelector('.disclaimer-modal-close');
 
     // Extract page name from URL and display it in eyebrow div
     const pathname = window.location.pathname;
@@ -226,14 +226,14 @@ export default async function decorate(block) {
         headerRow.append(th);
     });
 
-    const searchInput = block.querySelector('#disclosure-search');
+    const searchInput = block.querySelector('#disclaimer-search');
     const searchLabel = block.querySelector(
-        'label[for="disclosure-search"]',
+        'label[for="disclaimer-search"]',
     );
     const searchCloseButton = block.querySelector('.search-close');
     const tbody = block.querySelector('tbody');
-    const pagination = block.querySelector('.disclosure-pagination');
-    const message = block.querySelector('.disclosure-library-message');
+    const pagination = block.querySelector('.disclaimer-pagination');
+    const message = block.querySelector('.disclaimer-library-message');
 
     // Apply the EDS-authored search settings.
     searchLabel.textContent = authorableSettings['search title'];
@@ -261,8 +261,8 @@ export default async function decorate(block) {
         toggleSearchCloseButton();
     });
 
-    let disclosures = [];
-    let filteredDisclosures = [];
+    let disclaimers = [];
+    let dilteredDisclaimers = [];
     let currentPage = 1;
 
     // Read a named value from AEM stringMetadata.
@@ -296,7 +296,7 @@ export default async function decorate(block) {
     }
 
     // Convert an AEM GraphQL record into the UI data structure.
-    function normalizeDisclosure(item) {
+    function dormalizeDisclaimer(item) {
         return {
             name: getMetadataValue(item, 'disc.disclaimerName'),
             updatedBy: getMetadataValue(item, 'disc.owner'),
@@ -322,7 +322,7 @@ export default async function decorate(block) {
     function applyFilters() {
         const query = searchInput.value.trim().toLowerCase();
 
-        filteredDisclosures = disclosures.filter((item) => {
+        dilteredDisclaimers = disclaimers.filter((item) => {
             return [
                 item.name,
                 item.shortCode,
@@ -341,7 +341,7 @@ export default async function decorate(block) {
         tbody.replaceChildren();
         pagination.replaceChildren();
 
-        const totalRecords = filteredDisclosures.length;
+        const totalRecords = dilteredDisclaimers.length;
         const totalPages = Math.ceil(totalRecords / PAGE_SIZE);
 
         currentPage = Math.max(
@@ -355,7 +355,7 @@ export default async function decorate(block) {
             totalRecords,
         );
 
-        const paginatedItems = filteredDisclosures.slice(
+        const paginatedItems = dilteredDisclaimers.slice(
             startIndex,
             endIndex,
         );
@@ -363,7 +363,7 @@ export default async function decorate(block) {
         paginatedItems.forEach((item) => {
             const row = document.createElement('tr');
 
-            // Disclosure Name.
+            // disclaimer Name.
             const nameCell = document.createElement('td');
             nameCell.textContent = item.name;
             row.append(nameCell);
@@ -390,7 +390,7 @@ export default async function decorate(block) {
             const previewButton = document.createElement('button');
 
             previewButton.type = 'button';
-            previewButton.className = 'disclosure-preview-button';
+            previewButton.className = 'disclaimer-preview-button';
             
             // Add eye icon before text
             const eyeIcon = `
@@ -414,8 +414,8 @@ export default async function decorate(block) {
             previewButton.innerHTML = eyeIcon + `<span>${authorableSettings['preview button text']}</span>`;
 
             previewButton.addEventListener('click', () => {
-                // Display the actual disclosure name as the modal title.
-                previewModalTitle.textContent = item.name || 'Disclosure Preview';
+                // Display the actual disclaimer name as the modal title.
+                previewModalTitle.textContent = item.name || 'disclaimer Preview';
 
                 // Clear previous preview content.
                 previewModalContent.replaceChildren();
@@ -436,16 +436,16 @@ export default async function decorate(block) {
                     item.updatedBy ? `by ${item.updatedBy}` : '',
                 ].filter(Boolean).join(' ');
 
-                // Disclosure Text label.
-                const disclosureLabel = document.createElement('h4');
-                disclosureLabel.textContent = 'Disclosure Text';
-                previewModalContent.append(disclosureLabel);
+                // disclaimer Text label.
+                const disclaimerLabel = document.createElement('h4');
+                disclaimerLabel.textContent = 'disclaimer Text';
+                previewModalContent.append(disclaimerLabel);
 
-                // Disclosure description/content.
-                const disclosureText = document.createElement('p');
-                disclosureText.className = 'disclosure-preview-text';
-                disclosureText.textContent = item.preview || item.description || '';
-                previewModalContent.append(disclosureText);
+                // disclaimer description/content.
+                const disclaimerText = document.createElement('p');
+                disclaimerText.className = 'disclaimer-preview-text';
+                disclaimerText.textContent = item.preview || item.description || '';
+                previewModalContent.append(disclaimerText);
 
                 // Short Code label.
                 const shortCodeLabel = document.createElement('h4');
@@ -454,7 +454,7 @@ export default async function decorate(block) {
 
                 // Short Code value.
                 const shortCodeValue = document.createElement('p');
-                shortCodeValue.className = 'disclosure-preview-shortcode';
+                shortCodeValue.className = 'disclaimer-preview-shortcode';
                 shortCodeValue.textContent = item.shortCode || '';
                 previewModalContent.append(shortCodeValue);
 
@@ -470,8 +470,8 @@ export default async function decorate(block) {
             const code = document.createElement('code');
             const copyButton = document.createElement('button');
 
-            codeWrapper.className = 'disclosure-shortcode-wrapper';
-            copyButton.className = 'disclosure-copy-button';
+            codeWrapper.className = 'disclaimer-shortcode-wrapper';
+            copyButton.className = 'disclaimer-copy-button';
             copyButton.type = 'button';
             copyButton.setAttribute('aria-label', 'Copy short code');
             copyButton.title = 'Copy short code';
@@ -546,7 +546,7 @@ export default async function decorate(block) {
 
         // Record count.
         const recordCount = document.createElement('p');
-        recordCount.className = 'disclosure-record-count';
+        recordCount.className = 'disclaimer-record-count';
         recordCount.textContent =
             `Showing ${totalRecords ? startIndex + 1 : 0}-${endIndex} of ${totalRecords} records`;
 
@@ -554,7 +554,7 @@ export default async function decorate(block) {
 
         // Pagination controls.
         const controls = document.createElement('div');
-        controls.className = 'disclosure-pagination-controls';
+        controls.className = 'disclaimer-pagination-controls';
         pagination.append(controls);
 
         function createButton(
@@ -648,7 +648,7 @@ export default async function decorate(block) {
 
         message.textContent = totalRecords
             ? ''
-            : 'No disclosures found.';
+            : 'No disclaimers found.';
     }
 
     // Close the preview modal using the close button.
@@ -682,12 +682,12 @@ export default async function decorate(block) {
         }
     });
 
-    // Search disclosures.
+    // Search disclaimers.
     searchInput.addEventListener('input', applyFilters);
 
     // Fetch and render AEM GraphQL data.
     try {
-        message.textContent = 'Loading disclosures...';
+        message.textContent = 'Loading disclaimers...';
 
         const response = await fetch(API_URL);
 
@@ -697,22 +697,22 @@ export default async function decorate(block) {
 
         const data = await response.json();
 
-        const items = data?.data?.disclaimerHubList?.items;
+        const items = data?.data?.disclaimerhubList?.items;
 
         if (!Array.isArray(items)) {
             throw new Error(
-                'Unexpected API response: data.disclaimerHubList.items is missing.',
+                'Unexpected API response: data.disclaimerhubList.items is missing.',
             );
         }
 
-        disclosures = items.map(normalizeDisclosure);
+        disclaimers = items.map(dormalizeDisclaimer);
 
         applyFilters();
     } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('Unable to load disclosures:', error);
+        console.error('Unable to load disclaimers:', error);
 
         message.textContent =
-            'Unable to load disclosures. Check the API response and network connection.';
+            'Unable to load disclaimers. Check the API response and network connection.';
     }
 }
