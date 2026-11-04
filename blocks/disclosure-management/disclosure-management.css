@@ -76,7 +76,7 @@
 .toolbar-search input {
   box-sizing: border-box;
   width: 100%;
-  padding: 7px 16px 7px 40px;
+  padding: 7px 48px 7px 40px;
   border: 1px solid var(--n400);
   color: var(--black);
   border-radius: 6px;
@@ -92,6 +92,45 @@
 
 .toolbar-search input::placeholder {
   color: var(--n600);
+}
+
+/* Hide native search clear button */
+.toolbar-search input[type="search"]::-webkit-search-cancel-button,
+.toolbar-search input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Custom search close button - matches modal close button */
+.toolbar-search .search-close {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--n600);
+  font-size: 40px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.toolbar-search .search-close.visible {
+  display: flex;
+}
+
+.toolbar-search .search-close:active {
+  transform: translateY(-50%) scale(0.95);
 }
 
 /* Filter dropdown - second element */

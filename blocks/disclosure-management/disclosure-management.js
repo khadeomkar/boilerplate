@@ -70,6 +70,13 @@ export default async function decorate(block) {
               type="search"
               placeholder=""
             />
+            <button
+              type="button"
+              class="search-close"
+              aria-label="Clear search"
+            >
+              &times;
+            </button>
           </div>
           
           <div class="toolbar-filters">
@@ -169,6 +176,7 @@ export default async function decorate(block) {
     const searchLabel = block.querySelector(
         'label[for="disclosure-search"]',
     );
+    const searchCloseButton = block.querySelector('.search-close');
     const tbody = block.querySelector('tbody');
     const pagination = block.querySelector('.disclosure-pagination');
     const message = block.querySelector('.disclosure-library-message');
@@ -176,6 +184,28 @@ export default async function decorate(block) {
     // Apply the EDS-authored search settings.
     searchLabel.textContent = authorableSettings['search title'];
     searchInput.placeholder = authorableSettings['search placeholder'];
+
+    // Toggle search close button visibility
+    function toggleSearchCloseButton() {
+        if (searchInput.value.trim()) {
+            searchCloseButton.classList.add('visible');
+        } else {
+            searchCloseButton.classList.remove('visible');
+        }
+    }
+
+    // Clear search input when close button is clicked
+    searchCloseButton.addEventListener('click', () => {
+        searchInput.value = '';
+        toggleSearchCloseButton();
+        applyFilters();
+        searchInput.focus();
+    });
+
+    // Show/hide close button as user types
+    searchInput.addEventListener('input', () => {
+        toggleSearchCloseButton();
+    });
 
     let disclosures = [];
     let filteredDisclosures = [];
