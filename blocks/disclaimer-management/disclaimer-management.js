@@ -1,6 +1,6 @@
 
-const API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-limit%3Boffset%3D0%3Blimit%3D10%3B';
-const PAGE_SIZE = 10;
+const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-limit';
+const PAGE_SIZE = 20;
 const maxVisiblePages = 5;
 
 export default async function decorate(block) {
@@ -81,10 +81,11 @@ export default async function decorate(block) {
           
           <div class="toolbar-filters">
             <select id="product-line-filter" class="disclaimer-filter-select">
-              <option value="">Line of Business</option>
-              <option value="">Commercial</option>
-              <option value="">Dental</option>
-              <option value="">Vision</option>
+              <option value="Line of Business">Line of Business</option>
+              <option value="ACA Individual">ACA Individual</option>
+              <option value="Combined Market Segments">Combined Market Segments</option>
+              <option value="Digital">Digital</option>
+              <option value="Blue Edge Vision">Blue Edge Vision</option>
             </select>
           </div>
           
@@ -201,7 +202,7 @@ export default async function decorate(block) {
     const pathname = window.location.pathname;
     const pageName = pathname.split('/').filter(Boolean).pop() || '';
     const formattedPageName = pageName.replace(/-/g, ' ').toUpperCase();
-    
+
     const eyebrowDiv = block.querySelector('.eyebrow');
     if (formattedPageName && eyebrowDiv) {
         eyebrowDiv.textContent = formattedPageName;
@@ -231,6 +232,10 @@ export default async function decorate(block) {
         'label[for="disclaimer-search"]',
     );
     const searchCloseButton = block.querySelector('.search-close');
+    const productLineFilter = block.querySelector('#product-line-filter');
+    const stateFilter = block.querySelector('#state-filter');
+    const regionFilter = block.querySelector('#region-filter');
+    const audienceCheckboxes = block.querySelectorAll('input[name="audience"]');
     const tbody = block.querySelector('tbody');
     const pagination = block.querySelector('.disclaimer-pagination');
     const message = block.querySelector('.disclaimer-library-message');
@@ -252,7 +257,8 @@ export default async function decorate(block) {
     searchCloseButton.addEventListener('click', () => {
         searchInput.value = '';
         toggleSearchCloseButton();
-        applyFilters();
+        currentPage = 1;
+        fetchDisclaimers(currentPage);
         searchInput.focus();
     });
 
@@ -262,8 +268,51 @@ export default async function decorate(block) {
     });
 
     let disclaimers = [];
-    let dilteredDisclaimers = [];
+    let filteredDisclaimers = [];
     let currentPage = 1;
+    let totalRecordsFromAPI = 0;
+
+    // Function to build API URL with dynamic parameters
+    function buildApiUrl(page = 1) {
+        const params = [];
+        
+        // Always include offset and limit
+        const offset = (page - 1) * PAGE_SIZE;
+        params.push(`offset=${offset}`);
+        params.push(`limit=${PAGE_SIZE}`);
+        
+        // Add LOB parameter
+        const lob = productLineFilter.value || 'ACA Individual';
+        params.push(`lob=${encodeURIComponent(lob)}`);
+        
+        // Add search parameter if search query exists
+        const searchQuery = searchInput.value.trim();
+        if (searchQuery) {
+            params.push(`search=${encodeURIComponent(searchQuery)}`);
+        }
+        
+        // Add state filter if selected
+        const stateValue = stateFilter.value;
+        if (stateValue) {
+            params.push(`state=${encodeURIComponent(stateValue)}`);
+        }
+        
+        // Add region filter if selected
+        const regionValue = regionFilter.value;
+        if (regionValue) {
+            params.push(`region=${encodeURIComponent(regionValue)}`);
+        }
+        
+        // Add audience filter if any checkboxes are selected
+        const selectedAudiences = Array.from(audienceCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        if (selectedAudiences.length > 0) {
+            params.push(`audience=${encodeURIComponent(selectedAudiences.join(','))}`);
+        }
+        
+        return `${API_BASE_URL};${params.join(';')}`;
+    }
 
     // Read a named value from AEM stringMetadata.
     function getMetadataValue(item, metadataName) {
@@ -318,22 +367,9 @@ export default async function decorate(block) {
         };
     }
 
-    // Apply search and the selected filter together.
-    function applyFilters() {
-        const query = searchInput.value.trim().toLowerCase();
-
-        dilteredDisclaimers = disclaimers.filter((item) => {
-            return [
-                item.name,
-                item.shortCode,
-                item.updatedBy,
-                item.description,
-            ].some((value) =>
-                String(value ?? '').toLowerCase().includes(query),
-            );
-        });
-
-        currentPage = 1;
+    // Render data without client-side filtering (filtering is done server-side)
+    function renderData() {
+        filteredDisclaimers = disclaimers;
         renderRows();
     }
 
@@ -341,8 +377,7 @@ export default async function decorate(block) {
         tbody.replaceChildren();
         pagination.replaceChildren();
 
-        const totalRecords = dilteredDisclaimers.length;
-        const totalPages = Math.ceil(totalRecords / PAGE_SIZE);
+        const totalPages = Math.ceil(totalRecordsFromAPI / PAGE_SIZE);
 
         currentPage = Math.max(
             1,
@@ -352,15 +387,10 @@ export default async function decorate(block) {
         const startIndex = (currentPage - 1) * PAGE_SIZE;
         const endIndex = Math.min(
             startIndex + PAGE_SIZE,
-            totalRecords,
+            totalRecordsFromAPI,
         );
 
-        const paginatedItems = dilteredDisclaimers.slice(
-            startIndex,
-            endIndex,
-        );
-
-        paginatedItems.forEach((item) => {
+        filteredDisclaimers.forEach((item) => {
             const row = document.createElement('tr');
 
             // disclaimer Name.
@@ -395,7 +425,7 @@ export default async function decorate(block) {
 
             previewButton.type = 'button';
             previewButton.className = 'disclaimer-preview-button';
-            
+
             // Add eye icon before text
             const eyeIcon = `
                 <svg
@@ -414,7 +444,7 @@ export default async function decorate(block) {
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
             `;
-            
+
             previewButton.innerHTML = eyeIcon + `<span>${authorableSettings['preview button text']}</span>`;
 
             previewButton.addEventListener('click', () => {
@@ -552,7 +582,7 @@ export default async function decorate(block) {
         const recordCount = document.createElement('p');
         recordCount.className = 'disclaimer-record-count';
         recordCount.textContent =
-            `Showing ${totalRecords ? startIndex + 1 : 0}-${endIndex} of ${totalRecords} records`;
+            `Showing ${totalRecordsFromAPI ? startIndex + 1 : 0}-${endIndex} of ${totalRecordsFromAPI} records`;
 
         pagination.append(recordCount);
 
@@ -580,7 +610,7 @@ export default async function decorate(block) {
 
             button.addEventListener('click', () => {
                 currentPage = page;
-                renderRows();
+                fetchDisclaimers(page);
             });
 
             return button;
@@ -650,7 +680,7 @@ export default async function decorate(block) {
             });
         }
 
-        message.textContent = totalRecords
+        message.textContent = totalRecordsFromAPI
             ? ''
             : 'No disclaimers found.';
     }
@@ -674,7 +704,7 @@ export default async function decorate(block) {
 
     moreLinksButton.addEventListener('click', () => {
         const isExpanded = moreLinksButton.getAttribute('aria-expanded') === 'true';
-        
+
         if (isExpanded) {
             moreLinksButton.setAttribute('aria-expanded', 'false');
             moreFiltersSection.setAttribute('hidden', '');
@@ -686,37 +716,79 @@ export default async function decorate(block) {
         }
     });
 
-    // Search disclaimers.
-    searchInput.addEventListener('input', applyFilters);
+    // Function to fetch disclaimers from API
+    async function fetchDisclaimers(page = 1) {
+        try {
+            message.textContent = 'Loading disclaimers...';
 
-    // Fetch and render AEM GraphQL data.
-    try {
-        message.textContent = 'Loading disclaimers...';
+            const apiUrl = buildApiUrl(page);
+            const response = await fetch(apiUrl);
 
-        const response = await fetch(API_URL);
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
 
-        if (!response.ok) {
-            throw new Error(`API request failed: ${response.status}`);
+            const data = await response.json();
+
+            const items = data?.data?.disclaimerhubList?.items;
+
+            if (!Array.isArray(items)) {
+                throw new Error(
+                    'Unexpected API response: data.disclaimerhubList.items is missing.',
+                );
+            }
+
+            // Get total count from API response if available
+            totalRecordsFromAPI = data?.data?.disclaimerhubList?.totalCount || items.length;
+
+            disclaimers = items.map(dormalizeDisclaimer);
+
+            renderData();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Unable to load disclaimers:', error);
+
+            message.textContent =
+                'Unable to load disclaimers. Check the API response and network connection.';
         }
-
-        const data = await response.json();
-
-        const items = data?.data?.disclaimerhubList?.items;
-
-        if (!Array.isArray(items)) {
-            throw new Error(
-                'Unexpected API response: data.disclaimerhubList.items is missing.',
-            );
-        }
-
-        disclaimers = items.map(dormalizeDisclaimer);
-
-        applyFilters();
-    } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Unable to load disclaimers:', error);
-
-        message.textContent =
-            'Unable to load disclaimers. Check the API response and network connection.';
     }
+
+    // Search input with debounce
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentPage = 1;
+            fetchDisclaimers(currentPage);
+        }, 500); // 500ms debounce
+    });
+
+    // Product line filter change event
+    productLineFilter.addEventListener('change', () => {
+        currentPage = 1;
+        fetchDisclaimers(currentPage);
+    });
+
+    // State filter change event
+    stateFilter.addEventListener('change', () => {
+        currentPage = 1;
+        fetchDisclaimers(currentPage);
+    });
+
+    // Region filter change event
+    regionFilter.addEventListener('change', () => {
+        currentPage = 1;
+        fetchDisclaimers(currentPage);
+    });
+
+    // Audience checkbox change events
+    audienceCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', () => {
+            currentPage = 1;
+            fetchDisclaimers(currentPage);
+        });
+    });
+
+    // Initial fetch
+    fetchDisclaimers(currentPage);
 }
