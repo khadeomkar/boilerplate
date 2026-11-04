@@ -50,55 +50,55 @@
 
 /* Navigation Section */
 .nav-section {
-    padding: 14px 12px 4px;
+  padding: 14px 12px 4px;
 }
 
 .nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-item {
-    margin-bottom: 2px;
+  margin-bottom: 2px;
 }
 
 a.nav-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 12px;
-    border-radius: 10px;
-    color: var(--n700);
-    font-size: 15px;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background .12s ease, color .12s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  color: var(--n700);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
 }
 
 a.nav-link:hover {
-    background: var(--n200);
+  background: var(--n200);
 }
 
 a.nav-link.active {
-    background: var(--n1000);
-    color: var(--highmark-blue);
-    font-weight: 600;
+  background: var(--n1000);
+  color: var(--highmark-blue);
+  font-weight: 600;
 }
 
 a.nav-link svg {
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 a.nav-link.active svg {
-    stroke: var(--highmark-blue);
+  stroke: var(--highmark-blue);
 }
 
 a.nav-link svg {
-    stroke: var(--n700);
+  stroke: var(--n700);
 }
 
 /* Quick Links Section */

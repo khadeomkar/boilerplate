@@ -18,12 +18,12 @@
 }
 
 .eyebrow {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--highmark-blue);
-    margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--highmark-blue);
+  margin: 0 0 6px;
 }
 
 .page-header h1 {
@@ -156,7 +156,7 @@
 }
 
 .disclosure-library tbody tr:nth-child(even) {
-    background: var(--n200);
+  background: var(--n200);
 }
 
 .disclosure-library code {
@@ -252,7 +252,8 @@ button.disclosure-copy-button {
   border: none;
   padding: 6px;
   cursor: pointer;
-  color: var(--together-blue);;
+  color: var(--together-blue);
+  ;
   transition: color 0.2s ease, background-color 0.2s ease;
   border-radius: 4px;
   line-height: 0;
@@ -346,8 +347,8 @@ button.disclosure-copy-button:active {
 }
 
 .modal::backdrop {
-      background: rgba(26, 26, 46, 0.55);
-      padding: 48px 20px;
+  background: rgba(26, 26, 46, 0.55);
+  padding: 48px 20px;
 }
 
 .modal-head {
