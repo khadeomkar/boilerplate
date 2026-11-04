@@ -91,6 +91,60 @@ export default async function decorate(block) {
           <button type="button" class="disclosure-new-button btn-primary">+ New Disclosure</button>
         </div>
 
+        <div class="more-filters-toggle">
+          <button type="button" class="more-filters-button" aria-expanded="false">
+            More Filters
+            <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <div class="more-filters-section" hidden>
+          <div class="more-filters-grid">
+            <div class="filter-group">
+              <label for="state-filter">State</label>
+              <select id="state-filter" class="disclosure-filter-select">
+                <option value="">Select State</option>
+                <option value="CA">California</option>
+                <option value="NY">New York</option>
+                <option value="TX">Texas</option>
+                <option value="FL">Florida</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="region-filter">Region</label>
+              <select id="region-filter" class="disclosure-filter-select">
+                <option value="">Select Region</option>
+                <option value="northeast">Northeast</option>
+                <option value="southeast">Southeast</option>
+                <option value="midwest">Midwest</option>
+                <option value="southwest">Southwest</option>
+                <option value="west">West</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Audience</label>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="audience" value="prospect" />
+                  <span>Prospect</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="audience" value="member" />
+                  <span>Member</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="audience" value="provider" />
+                  <span>Provider</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="disclosure-library-table-wrapper">
           <table>
             <thead>
@@ -606,6 +660,25 @@ export default async function decorate(block) {
     previewModal.addEventListener('click', (event) => {
         if (event.target === previewModal) {
             previewModal.close();
+        }
+    });
+
+    // More Links toggle functionality
+    const moreLinksButton = block.querySelector('.more-filters-button');
+    const moreFiltersSection = block.querySelector('.more-filters-section');
+    const chevronIcon = moreLinksButton.querySelector('.chevron-icon');
+
+    moreLinksButton.addEventListener('click', () => {
+        const isExpanded = moreLinksButton.getAttribute('aria-expanded') === 'true';
+        
+        if (isExpanded) {
+            moreLinksButton.setAttribute('aria-expanded', 'false');
+            moreFiltersSection.setAttribute('hidden', '');
+            chevronIcon.style.transform = 'rotate(0deg)';
+        } else {
+            moreLinksButton.setAttribute('aria-expanded', 'true');
+            moreFiltersSection.removeAttribute('hidden');
+            chevronIcon.style.transform = 'rotate(180deg)';
         }
     });
 
