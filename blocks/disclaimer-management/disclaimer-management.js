@@ -1,6 +1,7 @@
 
-const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-limit';
-const PAGE_SIZE = 20;
+const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers';
+const API_LIMIT = 100; // Fetch up to 100 records from API
+const PAGE_SIZE = 10; // Display 10 items per page
 const maxVisiblePages = 5;
 
 export default async function decorate(block) {
@@ -273,13 +274,12 @@ export default async function decorate(block) {
     let totalRecordsFromAPI = 0;
 
     // Function to build API URL with dynamic parameters
-    function buildApiUrl(page = 1) {
+    function buildApiUrl() {
         const params = [];
         
-        // Always include offset and limit
-        const offset = (page - 1) * PAGE_SIZE;
-        params.push(`offset=${offset}`);
-        params.push(`limit=${PAGE_SIZE}`);
+        // Fetch all records up to API_LIMIT (no pagination on API side)
+        params.push(`offset=0`);
+        params.push(`limit=${API_LIMIT}`);
         
         // Add LOB parameter
         const lob = productLineFilter.value || 'ACA Individual';
@@ -314,45 +314,15 @@ export default async function decorate(block) {
         return `${API_BASE_URL};${params.join(';')}`;
     }
 
-    // Read a named value from AEM stringMetadata.
-    function getMetadataValue(item, metadataName) {
-        const metadata = item?._metadata?.stringMetadata;
-
-        if (!Array.isArray(metadata)) {
-            return '';
-        }
-
-        const entry = metadata.find(
-            (field) => field.name === metadataName,
-        );
-
-        return entry?.value ?? '';
-    }
-
-    // Read a named value from AEM calendarMetadata.
-    function getCalendarValue(item, metadataName) {
-        const metadata = item?._metadata?.calendarMetadata;
-
-        if (!Array.isArray(metadata)) {
-            return '';
-        }
-
-        const entry = metadata.find(
-            (field) => field.name === metadataName,
-        );
-
-        return entry?.value ?? '';
-    }
-
     // Convert an AEM GraphQL record into the UI data structure.
     function dormalizeDisclaimer(item) {
         return {
-            name: getMetadataValue(item, 'disc.disclaimerName'),
-            updatedBy: getMetadataValue(item, 'disc.owner'),
-            description: getMetadataValue(item, 'disc.description'),
-            shortCode: getMetadataValue(item, 'disc.disclaimerId'),
+            name: item.disclaimerName || '',
+            updatedBy: item.owner || '',
+            description: item.approvedCopy || '',
+            shortCode: item.disclaimerId || '',
 
-            lastUpdated: getCalendarValue(item, 'cq:lastModified'),
+            lastUpdated: item.lastModified || '',
 
             // These fields are not present in the supplied API response.
             timesUsed: item.timesUsed ?? '',
@@ -360,16 +330,18 @@ export default async function decorate(block) {
                 ? item.editRequests
                 : [],
 
+            // Preserve approvedCopy object structure for preview
+            approvedCopy: item.approvedCopy || {},
+            
             // Use approved content when available for the preview.
-            preview:
-                item.approvedCopy?.plaintext
-                || getMetadataValue(item, 'disc.description'),
+            preview: item.approvedCopy || '',
         };
     }
 
-    // Render data without client-side filtering (filtering is done server-side)
+    // Render data - all filtering is done server-side, pagination is client-side
     function renderData() {
         filteredDisclaimers = disclaimers;
+        currentPage = 1; // Reset to first page when data changes
         renderRows();
     }
 
@@ -377,7 +349,8 @@ export default async function decorate(block) {
         tbody.replaceChildren();
         pagination.replaceChildren();
 
-        const totalPages = Math.ceil(totalRecordsFromAPI / PAGE_SIZE);
+        // Use client-side pagination with all fetched disclaimers
+        const totalPages = Math.ceil(filteredDisclaimers.length / PAGE_SIZE);
 
         currentPage = Math.max(
             1,
@@ -387,8 +360,11 @@ export default async function decorate(block) {
         const startIndex = (currentPage - 1) * PAGE_SIZE;
         const endIndex = Math.min(
             startIndex + PAGE_SIZE,
-            totalRecordsFromAPI,
+            filteredDisclaimers.length,
         );
+
+        // Get only the disclaimers for the current page
+        const pageDisclaimers = filteredDisclaimers.slice(startIndex, endIndex);
 
         // Create a mapping of column headers to their rendering functions
         const columnRenderers = {
@@ -472,9 +448,9 @@ export default async function decorate(block) {
                     disclaimerLabel.textContent = 'disclaimer Text';
                     previewModalContent.append(disclaimerLabel);
 
-                    const disclaimerText = document.createElement('p');
+                    const disclaimerText = document.createElement('div');
                     disclaimerText.className = 'disclaimer-preview-text';
-                    disclaimerText.textContent = item.preview || item.description || '';
+                    disclaimerText.innerHTML = item.approvedCopy?.html || item.preview || item.description || '';
                     previewModalContent.append(disclaimerText);
 
                     const shortCodeLabel = document.createElement('h4');
@@ -571,7 +547,7 @@ export default async function decorate(block) {
             },
         };
 
-        filteredDisclaimers.forEach((item) => {
+        pageDisclaimers.forEach((item) => {
             const row = document.createElement('tr');
 
             // Only render cells for columns that have headers defined in authoring
@@ -595,7 +571,7 @@ export default async function decorate(block) {
         const recordCount = document.createElement('p');
         recordCount.className = 'disclaimer-record-count';
         recordCount.textContent =
-            `Showing ${totalRecordsFromAPI ? startIndex + 1 : 0}-${endIndex} of ${totalRecordsFromAPI} records`;
+            `Showing ${filteredDisclaimers.length ? startIndex + 1 : 0}-${endIndex} of ${filteredDisclaimers.length} records`;
 
         pagination.append(recordCount);
 
@@ -623,7 +599,7 @@ export default async function decorate(block) {
 
             button.addEventListener('click', () => {
                 currentPage = page;
-                fetchDisclaimers(page);
+                renderRows(); // Just re-render with new page, no API call
             });
 
             return button;
@@ -693,7 +669,7 @@ export default async function decorate(block) {
             });
         }
 
-        message.textContent = totalRecordsFromAPI
+        message.textContent = filteredDisclaimers.length
             ? ''
             : 'No disclaimers found.';
     }
@@ -730,11 +706,11 @@ export default async function decorate(block) {
     });
 
     // Function to fetch disclaimers from API
-    async function fetchDisclaimers(page = 1) {
+    async function fetchDisclaimers() {
         try {
             message.textContent = 'Loading disclaimers...';
 
-            const apiUrl = buildApiUrl(page);
+            const apiUrl = buildApiUrl();
             const response = await fetch(apiUrl);
 
             if (!response.ok) {
@@ -743,16 +719,13 @@ export default async function decorate(block) {
 
             const data = await response.json();
 
-            const items = data?.data?.disclaimerhubList?.items;
+            const items = data?.data?.disclaimerHubList?.items;
 
             if (!Array.isArray(items)) {
                 throw new Error(
-                    'Unexpected API response: data.disclaimerhubList.items is missing.',
+                    'Unexpected API response: data.disclaimerHubList.items is missing.',
                 );
             }
-
-            // Get total count from API response if available
-            totalRecordsFromAPI = data?.data?.disclaimerhubList?.totalCount || items.length;
 
             disclaimers = items.map(dormalizeDisclaimer);
 
@@ -771,37 +744,32 @@ export default async function decorate(block) {
     searchInput.addEventListener('input', () => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            currentPage = 1;
-            fetchDisclaimers(currentPage);
+            fetchDisclaimers();
         }, 500); // 500ms debounce
     });
 
     // Product line filter change event
     productLineFilter.addEventListener('change', () => {
-        currentPage = 1;
-        fetchDisclaimers(currentPage);
+        fetchDisclaimers();
     });
 
     // State filter change event
     stateFilter.addEventListener('change', () => {
-        currentPage = 1;
-        fetchDisclaimers(currentPage);
+        fetchDisclaimers();
     });
 
     // Region filter change event
     regionFilter.addEventListener('change', () => {
-        currentPage = 1;
-        fetchDisclaimers(currentPage);
+        fetchDisclaimers();
     });
 
     // Audience checkbox change events
     audienceCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', () => {
-            currentPage = 1;
-            fetchDisclaimers(currentPage);
+            fetchDisclaimers();
         });
     });
 
     // Initial fetch
-    fetchDisclaimers(currentPage);
+    fetchDisclaimers();
 }
