@@ -84,8 +84,6 @@ export default async function decorate(block) {
             <select id="product-line-filter" class="disclaimer-filter-select">
               <option value="">Line of Business</option>
               <option value="ACA Individual">ACA Individual</option>
-              <option value="Combined Market Segments">Combined Market Segments</option>
-              <option value="Digital">Digital</option>
               <option value="Blue Edge Vision">Blue Edge Vision</option>
             </select>
           </div>
