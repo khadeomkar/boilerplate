@@ -390,190 +390,203 @@ export default async function decorate(block) {
             totalRecordsFromAPI,
         );
 
-        filteredDisclaimers.forEach((item) => {
-            const row = document.createElement('tr');
-
-            // disclaimer Name.
-            const nameCell = document.createElement('td');
-            nameCell.textContent = item.name;
-            row.append(nameCell);
-
-            // Last Updated.
-            const updatedCell = document.createElement('td');
-            updatedCell.textContent = item.lastUpdated
-                ? new Date(item.lastUpdated).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                })
-                : '';
-            row.append(updatedCell);
-
-            // Updated By.
-            const updatedByCell = document.createElement('td');
-            updatedByCell.textContent = item.updatedBy;
-            row.append(updatedByCell);
-
-            // Times Used.
-            const timesUsedCell = document.createElement('td');
-            timesUsedCell.textContent = item.timesUsed;
-            row.append(timesUsedCell);
-
-            // Preview button opens the modal.
-            const previewCell = document.createElement('td');
-            const previewButton = document.createElement('button');
-
-            previewButton.type = 'button';
-            previewButton.className = 'disclaimer-preview-button';
-
-            // Add eye icon before text
-            const eyeIcon = `
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-            `;
-
-            previewButton.innerHTML = eyeIcon + `<span>${authorableSettings['preview button text']}</span>`;
-
-            previewButton.addEventListener('click', () => {
-                // Display the actual disclaimer name as the modal title.
-                previewModalTitle.textContent = item.name || 'disclaimer Preview';
-
-                // Clear previous preview content.
-                previewModalContent.replaceChildren();
-
-                // Format the last-updated date.
-                const updatedDate = item.lastUpdated
+        // Create a mapping of column headers to their rendering functions
+        const columnRenderers = {
+            'name': (item) => {
+                const cell = document.createElement('td');
+                cell.textContent = item.name;
+                return cell;
+            },
+            'disclaimer name': (item) => {
+                const cell = document.createElement('td');
+                cell.textContent = item.name;
+                return cell;
+            },
+            'last updated': (item) => {
+                const cell = document.createElement('td');
+                cell.textContent = item.lastUpdated
                     ? new Date(item.lastUpdated).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                     })
                     : '';
+                return cell;
+            },
+            'updated by': (item) => {
+                const cell = document.createElement('td');
+                cell.textContent = item.updatedBy;
+                return cell;
+            },
+            'times used': (item) => {
+                const cell = document.createElement('td');
+                cell.textContent = item.timesUsed;
+                return cell;
+            },
+            'preview': (item) => {
+                const cell = document.createElement('td');
+                const previewButton = document.createElement('button');
 
-                // Display last-updated information.
-                previewModalUpdated.textContent = [
-                    'Last updated',
-                    updatedDate,
-                    item.updatedBy ? `by ${item.updatedBy}` : '',
-                ].filter(Boolean).join(' ');
+                previewButton.type = 'button';
+                previewButton.className = 'disclaimer-preview-button';
 
-                // disclaimer Text label.
-                const disclaimerLabel = document.createElement('h4');
-                disclaimerLabel.textContent = 'disclaimer Text';
-                previewModalContent.append(disclaimerLabel);
+                const eyeIcon = `
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                `;
 
-                // disclaimer description/content.
-                const disclaimerText = document.createElement('p');
-                disclaimerText.className = 'disclaimer-preview-text';
-                disclaimerText.textContent = item.preview || item.description || '';
-                previewModalContent.append(disclaimerText);
+                previewButton.innerHTML = eyeIcon + `<span>${authorableSettings['preview button text']}</span>`;
 
-                // Short Code label.
-                const shortCodeLabel = document.createElement('h4');
-                shortCodeLabel.textContent = 'Short Code';
-                previewModalContent.append(shortCodeLabel);
+                previewButton.addEventListener('click', () => {
+                    previewModalTitle.textContent = item.name || 'disclaimer Preview';
+                    previewModalContent.replaceChildren();
 
-                // Short Code value.
-                const shortCodeValue = document.createElement('p');
-                shortCodeValue.className = 'disclaimer-preview-shortcode';
-                shortCodeValue.textContent = item.shortCode || '';
-                previewModalContent.append(shortCodeValue);
+                    const updatedDate = item.lastUpdated
+                        ? new Date(item.lastUpdated).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                        })
+                        : '';
 
-                previewModal.showModal();
-            });
+                    previewModalUpdated.textContent = [
+                        'Last updated',
+                        updatedDate,
+                        item.updatedBy ? `by ${item.updatedBy}` : '',
+                    ].filter(Boolean).join(' ');
 
-            previewCell.append(previewButton);
-            row.append(previewCell);
+                    const disclaimerLabel = document.createElement('h4');
+                    disclaimerLabel.textContent = 'disclaimer Text';
+                    previewModalContent.append(disclaimerLabel);
 
-            // Short Code and copy button.
-            const codeCell = document.createElement('td');
-            const codeWrapper = document.createElement('div');
-            const code = document.createElement('code');
-            const copyButton = document.createElement('button');
+                    const disclaimerText = document.createElement('p');
+                    disclaimerText.className = 'disclaimer-preview-text';
+                    disclaimerText.textContent = item.preview || item.description || '';
+                    previewModalContent.append(disclaimerText);
 
-            codeWrapper.className = 'disclaimer-shortcode-wrapper';
-            copyButton.className = 'disclaimer-copy-button';
-            copyButton.type = 'button';
-            copyButton.setAttribute('aria-label', 'Copy short code');
-            copyButton.title = 'Copy short code';
+                    const shortCodeLabel = document.createElement('h4');
+                    shortCodeLabel.textContent = 'Short Code';
+                    previewModalContent.append(shortCodeLabel);
 
-            code.textContent = item.shortCode;
+                    const shortCodeValue = document.createElement('p');
+                    shortCodeValue.className = 'disclaimer-preview-shortcode';
+                    shortCodeValue.textContent = item.shortCode || '';
+                    previewModalContent.append(shortCodeValue);
 
-            const copyIcon = `
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <rect x="8" y="8" width="13" height="13" rx="2"/>
-                  <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>
-                </svg>
-            `;
+                    previewModal.showModal();
+                });
 
-            const copiedIcon = `
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="m5 12 4 4L19 6"/>
-                </svg>
-            `;
+                cell.append(previewButton);
+                return cell;
+            },
+            'short code': (item) => {
+                const cell = document.createElement('td');
+                const codeWrapper = document.createElement('div');
+                const code = document.createElement('code');
+                const copyButton = document.createElement('button');
 
-            copyButton.innerHTML = copyIcon;
+                codeWrapper.className = 'disclaimer-shortcode-wrapper';
+                copyButton.className = 'disclaimer-copy-button';
+                copyButton.type = 'button';
+                copyButton.setAttribute('aria-label', 'Copy short code');
+                copyButton.title = 'Copy short code';
 
-            copyButton.addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText(item.shortCode);
+                code.textContent = item.shortCode;
 
-                    copyButton.innerHTML = copiedIcon;
-                    copyButton.setAttribute('aria-label', 'Copied');
-                    copyButton.title = 'Copied!';
+                const copyIcon = `
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="8" y="8" width="13" height="13" rx="2"/>
+                      <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                `;
 
-                    window.setTimeout(() => {
-                        copyButton.innerHTML = copyIcon;
-                        copyButton.setAttribute(
-                            'aria-label',
-                            'Copy short code',
-                        );
-                        copyButton.title = 'Copy short code';
-                    }, 1500);
-                } catch {
-                    message.textContent =
-                        'Copy failed. Please copy the short code manually.';
+                const copiedIcon = `
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="m5 12 4 4L19 6"/>
+                    </svg>
+                `;
+
+                copyButton.innerHTML = copyIcon;
+
+                copyButton.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(item.shortCode);
+
+                        copyButton.innerHTML = copiedIcon;
+                        copyButton.setAttribute('aria-label', 'Copied');
+                        copyButton.title = 'Copied!';
+
+                        window.setTimeout(() => {
+                            copyButton.innerHTML = copyIcon;
+                            copyButton.setAttribute(
+                                'aria-label',
+                                'Copy short code',
+                            );
+                            copyButton.title = 'Copy short code';
+                        }, 1500);
+                    } catch {
+                        message.textContent =
+                            'Copy failed. Please copy the short code manually.';
+                    }
+                });
+
+                codeWrapper.append(code, copyButton);
+                cell.append(codeWrapper);
+                return cell;
+            },
+        };
+
+        filteredDisclaimers.forEach((item) => {
+            const row = document.createElement('tr');
+
+            // Only render cells for columns that have headers defined in authoring
+            tableHeaders.forEach((header) => {
+                const headerKey = header.toLowerCase().trim();
+                const renderer = columnRenderers[headerKey];
+
+                if (renderer) {
+                    row.append(renderer(item));
+                } else {
+                    // If no specific renderer exists, create empty cell
+                    const cell = document.createElement('td');
+                    row.append(cell);
                 }
             });
-
-            codeWrapper.append(code, copyButton);
-            codeCell.append(codeWrapper);
-            row.append(codeCell);
 
             tbody.append(row);
         });
