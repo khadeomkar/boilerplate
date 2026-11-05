@@ -82,7 +82,7 @@ export default async function decorate(block) {
           
           <div class="toolbar-filters">
             <select id="product-line-filter" class="disclaimer-filter-select">
-              <option value="Line of Business">Line of Business</option>
+              <option value="">Line of Business</option>
               <option value="ACA Individual">ACA Individual</option>
               <option value="Combined Market Segments">Combined Market Segments</option>
               <option value="Digital">Digital</option>
@@ -281,26 +281,28 @@ export default async function decorate(block) {
         params.push(`offset=0`);
         params.push(`limit=${API_LIMIT}`);
         
-        // Add LOB parameter
-        const lob = productLineFilter.value || 'ACA Individual';
-        params.push(`lob=${encodeURIComponent(lob)}`);
+        // Add LOB parameter only if a value is selected (not placeholder)
+        const lob = productLineFilter.value;
+        if (lob) {
+            params.push(`lob=${lob}`);
+        }
         
         // Add search parameter if search query exists
         const searchQuery = searchInput.value.trim();
         if (searchQuery) {
-            params.push(`search=${encodeURIComponent(searchQuery)}`);
+            params.push(`search=${searchQuery}`);
         }
         
         // Add state filter if selected
         const stateValue = stateFilter.value;
         if (stateValue) {
-            params.push(`state=${encodeURIComponent(stateValue)}`);
+            params.push(`state=${stateValue}`);
         }
         
         // Add region filter if selected
         const regionValue = regionFilter.value;
         if (regionValue) {
-            params.push(`region=${encodeURIComponent(regionValue)}`);
+            params.push(`region=${regionValue}`);
         }
         
         // Add audience filter if any checkboxes are selected
@@ -308,10 +310,14 @@ export default async function decorate(block) {
             .filter(cb => cb.checked)
             .map(cb => cb.value);
         if (selectedAudiences.length > 0) {
-            params.push(`audience=${encodeURIComponent(selectedAudiences.join(','))}`);
+            params.push(`audience=${selectedAudiences.join(',')}`);
         }
         
-        return `${API_BASE_URL};${params.join(';')}`;
+        // Join parameters with semicolon and then encode the entire parameter string
+        const paramString = params.join(';');
+        const encodedParams = encodeURIComponent(paramString);
+        
+        return `${API_BASE_URL}%3B${encodedParams}`;
     }
 
     // Convert an AEM GraphQL record into the UI data structure.
@@ -750,7 +756,10 @@ export default async function decorate(block) {
 
     // Product line filter change event
     productLineFilter.addEventListener('change', () => {
-        fetchDisclaimers();
+        // Only fetch if a valid option is selected (not the placeholder)
+        if (productLineFilter.value) {
+            fetchDisclaimers();
+        }
     });
 
     // State filter change event
@@ -770,6 +779,6 @@ export default async function decorate(block) {
         });
     });
 
-    // Initial fetch
+    // initial fetch on page load
     fetchDisclaimers();
 }
