@@ -1,5 +1,6 @@
 
 const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers';
+const LOB_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/lob';
 const API_LIMIT = 100; // Fetch up to 100 records from API
 const PAGE_SIZE = 10; // Display 10 items per page
 const maxVisiblePages = 5;
@@ -83,8 +84,6 @@ export default async function decorate(block) {
           <div class="toolbar-filters">
             <select id="product-line-filter" class="disclaimer-filter-select">
               <option value="">Line of Business</option>
-              <option value="ACA Individual">ACA Individual</option>
-              <option value="Blue Edge Vision">Blue Edge Vision</option>
             </select>
           </div>
           
@@ -795,6 +794,49 @@ export default async function decorate(block) {
         });
     });
 
+    // Function to fetch and populate Line of Business options
+    async function fetchAndPopulateLOB() {
+        try {
+            const response = await fetch(LOB_API_URL);
+
+            if (!response.ok) {
+                throw new Error(`LOB API request failed: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const items = data?.data?.disclaimerHubList?.items;
+
+            if (!Array.isArray(items)) {
+                throw new Error('Unexpected LOB API response: data.disclaimerHubList.items is missing.');
+            }
+
+            // Extract unique LOB values
+            const uniqueLOBs = [...new Set(
+                items
+                    .map(item => item.lineOfBusinessCategory)
+                    .filter(lob => lob && lob.trim() !== '')
+            )];
+
+            // Sort alphabetically
+            uniqueLOBs.sort((a, b) => a.localeCompare(b));
+
+            // Populate the select box
+            uniqueLOBs.forEach(lob => {
+                const option = document.createElement('option');
+                option.value = lob;
+                option.textContent = lob;
+                productLineFilter.appendChild(option);
+            });
+
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Unable to load Line of Business options:', error);
+        }
+    }
+
+    // Fetch LOB options first, then fetch disclaimers
+    fetchAndPopulateLOB();
+    
     // initial fetch on page load
     fetchDisclaimers();
 }
