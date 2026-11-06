@@ -754,10 +754,7 @@ export default async function decorate(block) {
 
     // Product line filter change event
     productLineFilter.addEventListener('change', () => {
-        // Only fetch if a valid option is selected (not the placeholder)
-        if (productLineFilter.value) {
-            fetchDisclaimers();
-        }
+        fetchDisclaimers();
     });
 
     // State filter change event
