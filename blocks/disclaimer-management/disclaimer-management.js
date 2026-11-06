@@ -152,6 +152,11 @@ export default async function decorate(block) {
             </thead>
             <tbody></tbody>
           </table>
+          <div class="loader-container" hidden>
+            <svg class="loader-spinner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+              <circle class="loader-path" cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+            </svg>
+          </div>
         </div>
 
         <div class="disclaimer-pagination"></div>
@@ -238,6 +243,7 @@ export default async function decorate(block) {
     const tbody = block.querySelector('tbody');
     const pagination = block.querySelector('.disclaimer-pagination');
     const message = block.querySelector('.disclaimer-library-message');
+    const loaderContainer = block.querySelector('.loader-container');
 
     // Apply the EDS-authored search settings.
     searchLabel.textContent = authorableSettings['search title'];
@@ -709,10 +715,23 @@ export default async function decorate(block) {
         }
     });
 
+    // Show loader
+    function showLoader() {
+        loaderContainer.removeAttribute('hidden');
+        tbody.replaceChildren(); // Clear existing table data
+        pagination.replaceChildren(); // Clear pagination
+        message.textContent = '';
+    }
+
+    // Hide loader
+    function hideLoader() {
+        loaderContainer.setAttribute('hidden', '');
+    }
+
     // Function to fetch disclaimers from API
     async function fetchDisclaimers() {
         try {
-            message.textContent = 'Loading disclaimers...';
+            showLoader();
 
             const apiUrl = buildApiUrl();
             const response = await fetch(apiUrl);
@@ -740,6 +759,8 @@ export default async function decorate(block) {
 
             message.textContent =
                 'Unable to load disclaimers. Check the API response and network connection.';
+        } finally {
+            hideLoader();
         }
     }
 
