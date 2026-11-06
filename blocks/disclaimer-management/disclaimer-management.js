@@ -19,6 +19,7 @@ export default async function decorate(block) {
         'search title': 'Search disclaimers',
         'search placeholder': 'Search by name, short code, or updated by',
         'preview button text': 'preview',
+        'no results': 'No disclaimers found.',
     };
 
     const authorableSettings = { ...defaultSettings };
@@ -680,7 +681,7 @@ export default async function decorate(block) {
 
         message.textContent = filteredDisclaimers.length
             ? ''
-            : 'No disclaimers found.';
+            : authorableSettings['no results'];
     }
 
     // Close the preview modal using the close button.
