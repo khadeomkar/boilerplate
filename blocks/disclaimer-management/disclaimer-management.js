@@ -1,6 +1,7 @@
 
 const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers';
 const LOB_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/lob';
+const STATE_REGIONS_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/state-regions';
 const INITIAL_API_LIMIT = 101; // Fetch 101 records on first call to check if more exist
 const SUBSEQUENT_API_LIMIT = 100; // Fetch 100 records on subsequent calls
 const PAGE_SIZE = 10; // Display 10 items per page
@@ -107,10 +108,6 @@ export default async function decorate(block) {
               <label for="state-filter">State</label>
               <select id="state-filter" class="disclaimer-filter-select">
                 <option value="">Select State</option>
-                <option value="CA">California</option>
-                <option value="NY">New York</option>
-                <option value="TX">Texas</option>
-                <option value="FL">Florida</option>
               </select>
             </div>
 
@@ -118,11 +115,6 @@ export default async function decorate(block) {
               <label for="region-filter">Region</label>
               <select id="region-filter" class="disclaimer-filter-select">
                 <option value="">Select Region</option>
-                <option value="northeast">Northeast</option>
-                <option value="southeast">Southeast</option>
-                <option value="midwest">Midwest</option>
-                <option value="southwest">Southwest</option>
-                <option value="west">West</option>
               </select>
             </div>
 
@@ -901,8 +893,107 @@ export default async function decorate(block) {
         }
     }
 
-    // Fetch LOB options first, then fetch disclaimers
+    // Function to parse regionMarket value and extract state and region
+    function parseRegionMarket(regionMarketValue) {
+        // Format: merkle:usa/{state}/{region}
+        // Example: merkle:usa/pa/wpa -> state: pa, region: wpa
+        const parts = regionMarketValue.split('/');
+        
+        if (parts.length >= 3 && parts[0] === 'merkle:usa') {
+            return {
+                state: parts[1],
+                region: parts[2]
+            };
+        }
+        
+        return null;
+    }
+
+    // Function to fetch and populate State and Region options
+    async function fetchAndPopulateStateRegions() {
+        try {
+            const response = await fetch(STATE_REGIONS_API_URL);
+
+            if (!response.ok) {
+                throw new Error(`State-Regions API request failed: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const items = data?.data?.disclaimerHubList?.items;
+
+            if (!Array.isArray(items)) {
+                throw new Error('Unexpected State-Regions API response: data.disclaimerHubList.items is missing.');
+            }
+
+            // Build a map of states to their regions
+            const stateRegionsMap = {};
+
+            items.forEach(item => {
+                const regionMarkets = item.regionMarket || [];
+                
+                regionMarkets.forEach(regionMarketValue => {
+                    const parsed = parseRegionMarket(regionMarketValue);
+                    
+                    if (parsed) {
+                        const { state, region } = parsed;
+                        
+                        if (!stateRegionsMap[state]) {
+                            stateRegionsMap[state] = new Set();
+                        }
+                        
+                        stateRegionsMap[state].add(region);
+                    }
+                });
+            });
+
+            // Convert sets to sorted arrays and populate state dropdown
+            const states = Object.keys(stateRegionsMap).sort();
+
+            states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state;
+                option.textContent = state.toUpperCase();
+                stateFilter.appendChild(option);
+            });
+
+            // Add event listener to state filter to populate regions
+            stateFilter.addEventListener('change', () => {
+                // Clear existing region options (except the placeholder)
+                regionFilter.innerHTML = '<option value="">Select Region</option>';
+                
+                const selectedState = stateFilter.value;
+                
+                if (selectedState && stateRegionsMap[selectedState]) {
+                    // Sort regions and populate the dropdown
+                    const regions = Array.from(stateRegionsMap[selectedState]).sort();
+                    
+                    regions.forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.textContent = region.toUpperCase();
+                        regionFilter.appendChild(option);
+                    });
+                    
+                    // Enable region dropdown
+                    regionFilter.disabled = false;
+                } else {
+                    // Disable region dropdown when no state is selected
+                    regionFilter.disabled = true;
+                }
+            });
+
+            // Initially disable region dropdown until a state is selected
+            regionFilter.disabled = true;
+
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('Unable to load State and Region options:', error);
+        }
+    }
+
+    // Fetch filter options first, then fetch disclaimers
     fetchAndPopulateLOB();
+    fetchAndPopulateStateRegions();
     
     // initial fetch on page load
     fetchDisclaimers();
