@@ -611,7 +611,8 @@ export default async function decorate(block) {
                 // Check if clicking on the last page and we might have more records
                 if (page === totalPages && hasMoreRecords) {
                     // Need to fetch more data
-                    currentOffset += SUBSEQUENT_API_LIMIT;
+                    // Use current disclaimers length as the offset to avoid duplicates
+                    currentOffset = disclaimers.length;
                     currentPage = page; // Set the page user wants to go to
                     await fetchDisclaimers(currentOffset, SUBSEQUENT_API_LIMIT, false);
                 } else {
