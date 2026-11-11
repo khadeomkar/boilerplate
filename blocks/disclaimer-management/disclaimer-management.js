@@ -577,8 +577,9 @@ export default async function decorate(block) {
         // Record count.
         const recordCount = document.createElement('p');
         recordCount.className = 'disclaimer-record-count';
+        const totalCount = hasMoreRecords ? `${filteredDisclaimers.length}+` : filteredDisclaimers.length;
         recordCount.textContent =
-            `Showing ${filteredDisclaimers.length ? startIndex + 1 : 0}-${endIndex} of ${filteredDisclaimers.length} records`;
+            `Showing ${filteredDisclaimers.length ? startIndex + 1 : 0}-${endIndex} of ${totalCount} records`;
 
         pagination.append(recordCount);
 
