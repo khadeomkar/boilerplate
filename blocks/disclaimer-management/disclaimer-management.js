@@ -1,7 +1,8 @@
 
 const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers';
 const LOB_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/lob';
-const API_LIMIT = 100; // Fetch up to 100 records from API
+const INITIAL_API_LIMIT = 101; // Fetch 101 records on first call to check if more exist
+const SUBSEQUENT_API_LIMIT = 100; // Fetch 100 records on subsequent calls
 const PAGE_SIZE = 10; // Display 10 items per page
 const maxVisiblePages = 5;
 
@@ -275,15 +276,17 @@ export default async function decorate(block) {
     let disclaimers = [];
     let filteredDisclaimers = [];
     let currentPage = 1;
-    let totalRecordsFromAPI = 0;
+    let currentOffset = 0;
+    let hasMoreRecords = false;
+    let isInitialLoad = true;
 
     // Function to build API URL with dynamic parameters
-    function buildApiUrl() {
+    function buildApiUrl(offset = 0, limit = INITIAL_API_LIMIT) {
         const params = [];
         
-        // Fetch all records up to API_LIMIT (no pagination on API side)
-        params.push(`offset=0`);
-        params.push(`limit=${API_LIMIT}`);
+        // Use dynamic offset and limit
+        params.push(`offset=${offset}`);
+        params.push(`limit=${limit}`);
         
         // Add LOB parameter only if a value is selected (not placeholder)
         const lob = productLineFilter.value;
@@ -349,9 +352,11 @@ export default async function decorate(block) {
     }
 
     // Render data - all filtering is done server-side, pagination is client-side
-    function renderData() {
+    function renderData(resetPage = true) {
         filteredDisclaimers = disclaimers;
-        currentPage = 1; // Reset to first page when data changes
+        if (resetPage) {
+            currentPage = 1; // Reset to first page when data changes
+        }
         renderRows();
     }
 
@@ -607,9 +612,19 @@ export default async function decorate(block) {
                 button.setAttribute('aria-current', 'page');
             }
 
-            button.addEventListener('click', () => {
-                currentPage = page;
-                renderRows(); // Just re-render with new page, no API call
+            button.addEventListener('click', async () => {
+                const totalPages = Math.ceil(filteredDisclaimers.length / PAGE_SIZE);
+                
+                // Check if clicking on the last page and we might have more records
+                if (page === totalPages && hasMoreRecords) {
+                    // Need to fetch more data
+                    currentOffset += SUBSEQUENT_API_LIMIT;
+                    currentPage = page; // Set the page user wants to go to
+                    await fetchDisclaimers(currentOffset, SUBSEQUENT_API_LIMIT, false);
+                } else {
+                    currentPage = page;
+                    renderRows(); // Just re-render with new page, no API call
+                }
             });
 
             return button;
@@ -729,11 +744,14 @@ export default async function decorate(block) {
     }
 
     // Function to fetch disclaimers from API
-    async function fetchDisclaimers() {
+    async function fetchDisclaimers(offset = 0, limit = null, resetData = true) {
         try {
             showLoader();
 
-            const apiUrl = buildApiUrl();
+            // Determine the limit based on whether it's the initial load or subsequent load
+            const fetchLimit = limit !== null ? limit : (isInitialLoad ? INITIAL_API_LIMIT : SUBSEQUENT_API_LIMIT);
+            
+            const apiUrl = buildApiUrl(offset, fetchLimit);
             const response = await fetch(apiUrl);
 
             if (!response.ok) {
@@ -750,9 +768,37 @@ export default async function decorate(block) {
                 );
             }
 
-            disclaimers = items.map(dormalizeDisclaimer);
+            const normalizedItems = items.map(dormalizeDisclaimer);
 
-            renderData();
+            // Check if we have more records to fetch
+            if (isInitialLoad) {
+                // First load - display all records including the 101st if present
+                disclaimers = normalizedItems;
+                
+                // Check if we got 101 records (meaning more exist)
+                hasMoreRecords = normalizedItems.length > SUBSEQUENT_API_LIMIT;
+                
+                isInitialLoad = false;
+            } else {
+                // Subsequent loads
+                if (resetData) {
+                    disclaimers = normalizedItems;
+                    currentOffset = offset;
+                    hasMoreRecords = normalizedItems.length >= SUBSEQUENT_API_LIMIT;
+                } else {
+                    // Append new records to existing ones
+                    disclaimers = [...disclaimers, ...normalizedItems];
+                    
+                    // Check if there are more records
+                    hasMoreRecords = normalizedItems.length >= SUBSEQUENT_API_LIMIT;
+                    
+                    // Don't reset page, just continue pagination
+                    renderData(false);
+                    return;
+                }
+            }
+
+            renderData(resetData);
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Unable to load disclaimers:', error);
@@ -769,28 +815,48 @@ export default async function decorate(block) {
     searchInput.addEventListener('input', () => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
+            // Reset pagination state on new search
+            currentOffset = 0;
+            isInitialLoad = true;
+            hasMoreRecords = false;
             fetchDisclaimers();
         }, 500); // 500ms debounce
     });
 
     // Product line filter change event
     productLineFilter.addEventListener('change', () => {
+        // Reset pagination state on filter change
+        currentOffset = 0;
+        isInitialLoad = true;
+        hasMoreRecords = false;
         fetchDisclaimers();
     });
 
     // State filter change event
     stateFilter.addEventListener('change', () => {
+        // Reset pagination state on filter change
+        currentOffset = 0;
+        isInitialLoad = true;
+        hasMoreRecords = false;
         fetchDisclaimers();
     });
 
     // Region filter change event
     regionFilter.addEventListener('change', () => {
+        // Reset pagination state on filter change
+        currentOffset = 0;
+        isInitialLoad = true;
+        hasMoreRecords = false;
         fetchDisclaimers();
     });
 
     // Audience checkbox change events
     audienceCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', () => {
+            // Reset pagination state on filter change
+            currentOffset = 0;
+            isInitialLoad = true;
+            hasMoreRecords = false;
             fetchDisclaimers();
         });
     });
