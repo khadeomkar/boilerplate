@@ -470,7 +470,7 @@ export default async function decorate(block) {
                     ].filter(Boolean).join(' ');
 
                     const disclaimerLabel = document.createElement('h4');
-                    disclaimerLabel.textContent = 'disclaimer Text';
+                    disclaimerLabel.textContent = 'Disclaimer Text';
                     previewModalContent.append(disclaimerLabel);
 
                     const disclaimerText = document.createElement('div');
