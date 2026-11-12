@@ -1,5 +1,5 @@
-
 const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers';
+const API_BASE_URL_WITH_STATE = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-withstate';
 const LOB_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/lob';
 const STATE_REGIONS_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/state-regions';
 const INITIAL_API_LIMIT = 101; // Fetch 101 records on first call to check if more exist
@@ -283,9 +283,32 @@ export default async function decorate(block) {
     function buildApiUrl(offset = 0, limit = INITIAL_API_LIMIT) {
         const params = [];
         
+        // Check if state filter is selected to determine which endpoint to use
+        const stateValue = stateFilter.value;
+        const regionValue = regionFilter.value;
+        const hasStateFilter = stateValue && stateValue.trim() !== '';
+        
+        // Choose the appropriate base URL
+        const baseUrl = hasStateFilter ? API_BASE_URL_WITH_STATE : API_BASE_URL;
+        
         // Use dynamic offset and limit
         params.push(`offset=${offset}`);
         params.push(`limit=${limit}`);
+        
+        // Add state and region parameters when state filter is selected
+        if (hasStateFilter) {
+            // region parameter: merkle:usa/{state}/{region or "all"}
+            const regionParam = regionValue && regionValue.trim() !== '' 
+                ? `merkle:usa/${stateValue}/${regionValue}`
+                : `merkle:usa/${stateValue}/all`;
+            params.push(`region=${regionParam}`);
+            
+            // state parameter: merkle:usa/{state}
+            params.push(`state=merkle:usa/${stateValue}`);
+            
+            // stateAll parameter: merkle:usa/{state}/all
+            params.push(`stateAll=merkle:usa/${stateValue}/all`);
+        }
         
         // Add LOB parameter only if a value is selected (not placeholder)
         const lob = productLineFilter.value;
@@ -299,31 +322,19 @@ export default async function decorate(block) {
             params.push(`search=${searchQuery}`);
         }
         
-        // Add state filter if selected
-        const stateValue = stateFilter.value;
-        if (stateValue) {
-            params.push(`state=${stateValue}`);
-        }
-        
-        // Add region filter if selected
-        const regionValue = regionFilter.value;
-        if (regionValue) {
-            params.push(`region=${regionValue}`);
-        }
-        
-        // Add audience filter if any checkboxes are selected
+        // Add audience filter as individual parameters (e.g., memberAudience=true)
         const selectedAudiences = Array.from(audienceCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.value);
-        if (selectedAudiences.length > 0) {
-            params.push(`audience=${selectedAudiences.join(',')}`);
-        }
+        selectedAudiences.forEach(audience => {
+            params.push(`${audience}Audience=true`);
+        });
         
-        // Join parameters with semicolon and then encode the entire parameter string
+        // Join parameters with semicolon and encode
         const paramString = params.join(';');
         const encodedParams = encodeURIComponent(paramString);
         
-        return `${API_BASE_URL}%3B${encodedParams}`;
+        return `${baseUrl}%3B${encodedParams}`;
     }
 
     // Convert an AEM GraphQL record into the UI data structure.
@@ -971,26 +982,45 @@ export default async function decorate(block) {
 
             // Add event listener to state filter to populate regions
             stateFilter.addEventListener('change', () => {
-                // Clear existing region options (except the placeholder)
-                regionFilter.innerHTML = '<option value="">Select Region</option>';
-                
                 const selectedState = stateFilter.value;
                 
-                if (selectedState && stateRegionsMap[selectedState]) {
+                // Check if state is selected and it's not "all"
+                if (selectedState && selectedState.toLowerCase() !== 'all' && stateRegionsMap[selectedState]) {
+                    // Clear existing region options
+                    regionFilter.innerHTML = '';
+                    
                     // Sort regions and populate the dropdown
                     const regions = Array.from(stateRegionsMap[selectedState]).sort();
                     
-                    regions.forEach(region => {
+                    // Check if "all" exists in the regions data
+                    const hasAllOption = regions.some((region) => region.toLowerCase() === 'all');
+                    
+                    // If "all" doesn't exist, add it as the first option
+                    if (!hasAllOption) {
+                        const allOption = document.createElement('option');
+                        allOption.value = 'all';
+                        allOption.textContent = 'ALL';
+                        allOption.selected = true;
+                        regionFilter.appendChild(allOption);
+                    }
+                    
+                    // Add all regions from the data
+                    regions.forEach((region) => {
                         const option = document.createElement('option');
                         option.value = region;
                         option.textContent = region.toUpperCase();
+                        // Select "all" if it exists in the data, or if it's the first option we added
+                        if (region.toLowerCase() === 'all' || (!hasAllOption && regionFilter.options.length === 1)) {
+                            option.selected = true;
+                        }
                         regionFilter.appendChild(option);
                     });
                     
                     // Enable region dropdown
                     regionFilter.disabled = false;
                 } else {
-                    // Disable region dropdown when no state is selected
+                    // When no state is selected or state is "all", disable region dropdown
+                    regionFilter.innerHTML = '<option value="">Select Region</option>';
                     regionFilter.disabled = true;
                 }
             });
