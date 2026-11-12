@@ -1000,7 +1000,6 @@ export default async function decorate(block) {
                         const allOption = document.createElement('option');
                         allOption.value = 'all';
                         allOption.textContent = 'ALL';
-                        allOption.selected = true;
                         regionFilter.appendChild(allOption);
                     }
                     
@@ -1009,12 +1008,11 @@ export default async function decorate(block) {
                         const option = document.createElement('option');
                         option.value = region;
                         option.textContent = region.toUpperCase();
-                        // Select "all" if it exists in the data, or if it's the first option we added
-                        if (region.toLowerCase() === 'all' || (!hasAllOption && regionFilter.options.length === 1)) {
-                            option.selected = true;
-                        }
                         regionFilter.appendChild(option);
                     });
+                    
+                    // Explicitly set the region dropdown value to "all"
+                    regionFilter.value = 'all';
                     
                     // Enable region dropdown
                     regionFilter.disabled = false;
