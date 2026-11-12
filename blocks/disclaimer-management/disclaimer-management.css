@@ -274,17 +274,6 @@
   white-space: nowrap;
 }
 
-.filter-apply-button {
-  background: var(--together-blue);
-  color: var(--white);
-  border-color: var(--together-blue);
-}
-
-.filter-apply-button:hover {
-  background: var(--highmark-blue);
-  border-color: var(--highmark-blue);
-}
-
 .filter-clear-button {
   background: var(--white);
   color: var(--n700);
