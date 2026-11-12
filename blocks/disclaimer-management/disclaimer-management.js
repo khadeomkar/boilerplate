@@ -135,6 +135,11 @@ export default async function decorate(block) {
                 </label>
               </div>
             </div>
+
+            <div class="filter-actions">
+              <button type="button" class="filter-apply-button btn-primary">Apply</button>
+              <button type="button" class="filter-clear-button btn-secondary">Clear</button>
+            </div>
           </div>
         </div>
 
@@ -233,6 +238,8 @@ export default async function decorate(block) {
     const stateFilter = block.querySelector('#state-filter');
     const regionFilter = block.querySelector('#region-filter');
     const audienceCheckboxes = block.querySelectorAll('input[name="audience"]');
+    const applyFiltersButton = block.querySelector('.filter-apply-button');
+    const clearFiltersButton = block.querySelector('.filter-clear-button');
     const tbody = block.querySelector('tbody');
     const pagination = block.querySelector('.disclaimer-pagination');
     const message = block.querySelector('.disclaimer-library-message');
@@ -826,8 +833,8 @@ export default async function decorate(block) {
         fetchDisclaimers();
     });
 
-    // State filter change event
-    stateFilter.addEventListener('change', () => {
+    // Apply filters button click event
+    applyFiltersButton.addEventListener('click', () => {
         // Reset pagination state on filter change
         currentOffset = 0;
         isInitialLoad = true;
@@ -835,24 +842,24 @@ export default async function decorate(block) {
         fetchDisclaimers();
     });
 
-    // Region filter change event
-    regionFilter.addEventListener('change', () => {
-        // Reset pagination state on filter change
-        currentOffset = 0;
-        isInitialLoad = true;
-        hasMoreRecords = false;
-        fetchDisclaimers();
-    });
-
-    // Audience checkbox change events
-    audienceCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener('change', () => {
-            // Reset pagination state on filter change
-            currentOffset = 0;
-            isInitialLoad = true;
-            hasMoreRecords = false;
-            fetchDisclaimers();
+    // Clear filters button click event
+    clearFiltersButton.addEventListener('click', () => {
+        // Reset all more filter fields
+        stateFilter.value = '';
+        regionFilter.value = '';
+        regionFilter.innerHTML = '<option value="">Select Region</option>';
+        regionFilter.disabled = true;
+        
+        // Uncheck all audience checkboxes
+        audienceCheckboxes.forEach((checkbox) => {
+            checkbox.checked = false;
         });
+        
+        // Reset pagination state and fetch disclaimers
+        currentOffset = 0;
+        isInitialLoad = true;
+        hasMoreRecords = false;
+        fetchDisclaimers();
     });
 
     // Function to fetch and populate Line of Business options
