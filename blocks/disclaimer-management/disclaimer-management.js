@@ -584,7 +584,11 @@ export default async function decorate(block) {
         // Record count.
         const recordCount = document.createElement('p');
         recordCount.className = 'disclaimer-record-count';
-        const totalCount = hasMoreRecords ? `${filteredDisclaimers.length}+` : filteredDisclaimers.length;
+        // When hasMoreRecords is true, display count as multiples of 100 with "+"
+        // e.g., 101 records → "100+", 201 records → "200+"
+        const totalCount = hasMoreRecords 
+            ? `${Math.floor(filteredDisclaimers.length / 100) * 100}+` 
+            : filteredDisclaimers.length;
         recordCount.textContent =
             `Showing ${filteredDisclaimers.length ? startIndex + 1 : 0}-${endIndex} of ${totalCount} records`;
 
