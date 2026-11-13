@@ -308,13 +308,20 @@ export default async function decorate(block) {
     let hasMoreRecords = false;
     let isInitialLoad = true;
 
+    // Store applied filter values (only updated when Apply button is clicked)
+    let appliedFilters = {
+        state: '',
+        region: '',
+        audiences: []
+    };
+
     // Function to build API URL with dynamic parameters
     function buildApiUrl(offset = 0, limit = INITIAL_API_LIMIT) {
         const params = [];
 
-        // Check if state filter is selected to determine which endpoint to use
-        const stateValue = stateFilter.value;
-        const regionValue = regionFilter.value;
+        // Use applied filter values instead of current UI values
+        const stateValue = appliedFilters.state;
+        const regionValue = appliedFilters.region;
         const hasStateFilter = stateValue && stateValue.trim() !== '';
 
         // Choose the appropriate base URL
@@ -350,10 +357,8 @@ export default async function decorate(block) {
         params.push(`search=${encodeURIComponent(searchQuery)}`);
 
         // Add audience filter as individual parameters (e.g., memberAudience=true)
-        const selectedAudiences = Array.from(audienceCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.value);
-        selectedAudiences.forEach(audience => {
+        // Use applied audiences instead of current checkbox state
+        appliedFilters.audiences.forEach(audience => {
             params.push(`${audience}Audience=true`);
         });
 
@@ -877,6 +882,13 @@ export default async function decorate(block) {
 
     // Apply filters button click event
     applyFiltersButton.addEventListener('click', () => {
+        // Update applied filter values with current UI selections
+        appliedFilters.state = stateFilter.value;
+        appliedFilters.region = regionFilter.value;
+        appliedFilters.audiences = Array.from(audienceCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
         // Reset pagination state on filter change
         currentOffset = 0;
         isInitialLoad = true;
@@ -896,6 +908,11 @@ export default async function decorate(block) {
         audienceCheckboxes.forEach((checkbox) => {
             checkbox.checked = false;
         });
+
+        // Clear applied filter values
+        appliedFilters.state = '';
+        appliedFilters.region = '';
+        appliedFilters.audiences = [];
 
         // Reset pagination state and fetch disclaimers
         currentOffset = 0;
