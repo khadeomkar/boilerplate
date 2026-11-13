@@ -1,5 +1,5 @@
-const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers';
-const API_BASE_URL_WITH_STATE = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-withstate';
+const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/getDisclaimer';
+const API_BASE_URL_WITH_STATE = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-state';
 const LOB_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/lob';
 const STATE_REGIONS_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/state-regions';
 const INITIAL_API_LIMIT = 101; // Fetch 101 records on first call to check if more exist
