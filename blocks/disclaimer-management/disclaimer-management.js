@@ -345,11 +345,9 @@ export default async function decorate(block) {
             params.push(`lob=${lob}`);
         }
 
-        // Add search parameter if search query exists
+        // Always add search parameter (empty if no search query)
         const searchQuery = searchInput.value.trim();
-        if (searchQuery) {
-            params.push(`search=${searchQuery}`);
-        }
+        params.push(`search=${encodeURIComponent(searchQuery)}`);
 
         // Add audience filter as individual parameters (e.g., memberAudience=true)
         const selectedAudiences = Array.from(audienceCheckboxes)
