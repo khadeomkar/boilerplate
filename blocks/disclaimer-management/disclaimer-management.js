@@ -253,7 +253,7 @@ export default async function decorate(block) {
     const moreFiltersButton = block.querySelector('.more-filters-button');
     const stateLabel = block.querySelector('label[for="state-filter"]');
     const regionLabel = block.querySelector('label[for="region-filter"]');
-    const audienceLabel = block.querySelector('.filter-group label');
+    const audienceLabel = block.querySelector('.filter-group label:not([for])');
 
     // Apply the EDS-authored settings.
     searchLabel.textContent = authorableSettings['search title'];
