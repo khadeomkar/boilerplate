@@ -7,6 +7,20 @@ const SUBSEQUENT_API_LIMIT = 100; // Fetch 100 records on subsequent calls
 const PAGE_SIZE = 10; // Display 10 items per page
 const maxVisiblePages = 5;
 
+// Default values for authorable settings.
+const defaultSettings = {
+    'search title': 'Search disclaimers',
+    'search placeholder': 'Search by name, short code, or updated by',
+    'preview button text': 'preview',
+    'no results': 'No disclaimers found.',
+    'more filters': 'More Filters',
+    'state label': 'State',
+    'region label': 'Region',
+    'audience label': 'Audience',
+    'filter apply button text': 'Apply',
+    'filter clear button text': 'Clear',
+};
+
 export default async function decorate(block) {
     // Preserve content authored in EDS.
     const authoredContent = [...block.children];
@@ -15,14 +29,6 @@ export default async function decorate(block) {
         'h1, h2, h3, h4, h5, h6',
     );
     const description = authoredContent[1];
-
-    // Default values for authorable settings.
-    const defaultSettings = {
-        'search title': 'Search disclaimers',
-        'search placeholder': 'Search by name, short code, or updated by',
-        'preview button text': 'preview',
-        'no results': 'No disclaimers found.',
-    };
 
     const authorableSettings = { ...defaultSettings };
     const settingNames = new Set(Object.keys(defaultSettings));
@@ -244,10 +250,33 @@ export default async function decorate(block) {
     const pagination = block.querySelector('.disclaimer-pagination');
     const message = block.querySelector('.disclaimer-library-message');
     const loaderContainer = block.querySelector('.loader-container');
+    const moreFiltersButton = block.querySelector('.more-filters-button');
+    const stateLabel = block.querySelector('label[for="state-filter"]');
+    const regionLabel = block.querySelector('label[for="region-filter"]');
+    const audienceLabel = block.querySelector('.filter-group label');
 
-    // Apply the EDS-authored search settings.
+    // Apply the EDS-authored settings.
     searchLabel.textContent = authorableSettings['search title'];
     searchInput.placeholder = authorableSettings['search placeholder'];
+
+    // Apply filter settings
+    if (moreFiltersButton) {
+        const buttonText = moreFiltersButton.childNodes[0];
+        if (buttonText && buttonText.nodeType === Node.TEXT_NODE) {
+            buttonText.textContent = authorableSettings['more filters'] + ' ';
+        }
+    }
+    if (stateLabel) {
+        stateLabel.textContent = authorableSettings['state label'];
+    }
+    if (regionLabel) {
+        regionLabel.textContent = authorableSettings['region label'];
+    }
+    if (audienceLabel) {
+        audienceLabel.textContent = authorableSettings['audience label'];
+    }
+    applyFiltersButton.textContent = authorableSettings['filter apply button text'];
+    clearFiltersButton.textContent = authorableSettings['filter clear button text'];
 
     // Toggle search close button visibility
     function toggleSearchCloseButton() {
@@ -282,46 +311,46 @@ export default async function decorate(block) {
     // Function to build API URL with dynamic parameters
     function buildApiUrl(offset = 0, limit = INITIAL_API_LIMIT) {
         const params = [];
-        
+
         // Check if state filter is selected to determine which endpoint to use
         const stateValue = stateFilter.value;
         const regionValue = regionFilter.value;
         const hasStateFilter = stateValue && stateValue.trim() !== '';
-        
+
         // Choose the appropriate base URL
         const baseUrl = hasStateFilter ? API_BASE_URL_WITH_STATE : API_BASE_URL;
-        
+
         // Use dynamic offset and limit
         params.push(`offset=${offset}`);
         params.push(`limit=${limit}`);
-        
+
         // Add state and region parameters when state filter is selected
         if (hasStateFilter) {
             // region parameter: merkle:usa/{state}/{region or "all"}
-            const regionParam = regionValue && regionValue.trim() !== '' 
+            const regionParam = regionValue && regionValue.trim() !== ''
                 ? `merkle:usa/${stateValue}/${regionValue}`
                 : `merkle:usa/${stateValue}/all`;
             params.push(`region=${regionParam}`);
-            
+
             // state parameter: merkle:usa/{state}
             params.push(`state=merkle:usa/${stateValue}`);
-            
+
             // stateAll parameter: merkle:usa/{state}/all
             params.push(`stateAll=merkle:usa/${stateValue}/all`);
         }
-        
+
         // Add LOB parameter only if a value is selected (not placeholder)
         const lob = productLineFilter.value;
         if (lob) {
             params.push(`lob=${lob}`);
         }
-        
+
         // Add search parameter if search query exists
         const searchQuery = searchInput.value.trim();
         if (searchQuery) {
             params.push(`search=${searchQuery}`);
         }
-        
+
         // Add audience filter as individual parameters (e.g., memberAudience=true)
         const selectedAudiences = Array.from(audienceCheckboxes)
             .filter(cb => cb.checked)
@@ -329,11 +358,11 @@ export default async function decorate(block) {
         selectedAudiences.forEach(audience => {
             params.push(`${audience}Audience=true`);
         });
-        
+
         // Join parameters with semicolon and encode
         const paramString = params.join(';');
         const encodedParams = encodeURIComponent(paramString);
-        
+
         return `${baseUrl}%3B${encodedParams}`;
     }
 
@@ -355,7 +384,7 @@ export default async function decorate(block) {
 
             // Preserve approvedCopy object structure for preview
             approvedCopy: item.approvedCopy || {},
-            
+
             // Use approved content when available for the preview.
             preview: item.approvedCopy || '',
         };
@@ -597,8 +626,8 @@ export default async function decorate(block) {
         recordCount.className = 'disclaimer-record-count';
         // When hasMoreRecords is true, display count as multiples of 100 with "+"
         // e.g., 101 records → "100+", 201 records → "200+"
-        const totalCount = hasMoreRecords 
-            ? `${Math.floor(filteredDisclaimers.length / 100) * 100}+` 
+        const totalCount = hasMoreRecords
+            ? `${Math.floor(filteredDisclaimers.length / 100) * 100}+`
             : filteredDisclaimers.length;
         recordCount.textContent =
             `Showing ${filteredDisclaimers.length ? startIndex + 1 : 0}-${endIndex} of ${totalCount} records`;
@@ -629,7 +658,7 @@ export default async function decorate(block) {
 
             button.addEventListener('click', async () => {
                 const totalPages = Math.ceil(filteredDisclaimers.length / PAGE_SIZE);
-                
+
                 // Check if clicking on the last page and we might have more records
                 if (page === totalPages && hasMoreRecords) {
                     // Need to fetch more data
@@ -766,7 +795,7 @@ export default async function decorate(block) {
 
             // Determine the limit based on whether it's the initial load or subsequent load
             const fetchLimit = limit !== null ? limit : (isInitialLoad ? INITIAL_API_LIMIT : SUBSEQUENT_API_LIMIT);
-            
+
             const apiUrl = buildApiUrl(offset, fetchLimit);
             const response = await fetch(apiUrl);
 
@@ -790,10 +819,10 @@ export default async function decorate(block) {
             if (isInitialLoad) {
                 // First load - display all records including the 101st if present
                 disclaimers = normalizedItems;
-                
+
                 // Check if we got 101 records (meaning more exist)
                 hasMoreRecords = normalizedItems.length > SUBSEQUENT_API_LIMIT;
-                
+
                 isInitialLoad = false;
             } else {
                 // Subsequent loads
@@ -804,10 +833,10 @@ export default async function decorate(block) {
                 } else {
                     // Append new records to existing ones
                     disclaimers = [...disclaimers, ...normalizedItems];
-                    
+
                     // Check if there are more records
                     hasMoreRecords = normalizedItems.length >= SUBSEQUENT_API_LIMIT;
-                    
+
                     // Don't reset page, just continue pagination
                     renderData(false);
                     return;
@@ -864,12 +893,12 @@ export default async function decorate(block) {
         regionFilter.value = '';
         regionFilter.innerHTML = '<option value="">Select Region</option>';
         regionFilter.disabled = true;
-        
+
         // Uncheck all audience checkboxes
         audienceCheckboxes.forEach((checkbox) => {
             checkbox.checked = false;
         });
-        
+
         // Reset pagination state and fetch disclaimers
         currentOffset = 0;
         isInitialLoad = true;
@@ -922,14 +951,14 @@ export default async function decorate(block) {
         // Format: merkle:usa/{state}/{region}
         // Example: merkle:usa/pa/wpa -> state: pa, region: wpa
         const parts = regionMarketValue.split('/');
-        
+
         if (parts.length >= 3 && parts[0] === 'merkle:usa') {
             return {
                 state: parts[1],
                 region: parts[2]
             };
         }
-        
+
         return null;
     }
 
@@ -954,17 +983,17 @@ export default async function decorate(block) {
 
             items.forEach(item => {
                 const regionMarkets = item.regionMarket || [];
-                
+
                 regionMarkets.forEach(regionMarketValue => {
                     const parsed = parseRegionMarket(regionMarketValue);
-                    
+
                     if (parsed) {
                         const { state, region } = parsed;
-                        
+
                         if (!stateRegionsMap[state]) {
                             stateRegionsMap[state] = new Set();
                         }
-                        
+
                         stateRegionsMap[state].add(region);
                     }
                 });
@@ -983,18 +1012,18 @@ export default async function decorate(block) {
             // Add event listener to state filter to populate regions
             stateFilter.addEventListener('change', () => {
                 const selectedState = stateFilter.value;
-                
+
                 // Check if state is selected and it's not "all"
                 if (selectedState && selectedState.toLowerCase() !== 'all' && stateRegionsMap[selectedState]) {
                     // Clear existing region options
                     regionFilter.innerHTML = '';
-                    
+
                     // Sort regions and populate the dropdown
                     const regions = Array.from(stateRegionsMap[selectedState]).sort();
-                    
+
                     // Check if "all" exists in the regions data
                     const hasAllOption = regions.some((region) => region.toLowerCase() === 'all');
-                    
+
                     // If "all" doesn't exist, add it as the first option
                     if (!hasAllOption) {
                         const allOption = document.createElement('option');
@@ -1002,7 +1031,7 @@ export default async function decorate(block) {
                         allOption.textContent = 'ALL';
                         regionFilter.appendChild(allOption);
                     }
-                    
+
                     // Add all regions from the data
                     regions.forEach((region) => {
                         const option = document.createElement('option');
@@ -1010,10 +1039,10 @@ export default async function decorate(block) {
                         option.textContent = region.toUpperCase();
                         regionFilter.appendChild(option);
                     });
-                    
+
                     // Explicitly set the region dropdown value to "all"
                     regionFilter.value = 'all';
-                    
+
                     // Enable region dropdown
                     regionFilter.disabled = false;
                 } else {
@@ -1035,7 +1064,7 @@ export default async function decorate(block) {
     // Fetch filter options first, then fetch disclaimers
     fetchAndPopulateLOB();
     fetchAndPopulateStateRegions();
-    
+
     // initial fetch on page load
     fetchDisclaimers();
 }
