@@ -333,17 +333,17 @@ export default async function decorate(block) {
 
         // Add state and region parameters when state filter is selected
         if (hasStateFilter) {
-            // region parameter: merkle:usa/{state}/{region or "all"}
+            // region parameter: highmark:usa/{state}/{region or "all"}
             const regionParam = regionValue && regionValue.trim() !== ''
-                ? `merkle:usa/${stateValue}/${regionValue}`
-                : `merkle:usa/${stateValue}/all`;
+                ? `highmark:usa/${stateValue}/${regionValue}`
+                : `highmark:usa/${stateValue}/all`;
             params.push(`region=${regionParam}`);
 
-            // state parameter: merkle:usa/{state}
-            params.push(`state=merkle:usa/${stateValue}`);
+            // state parameter: highmark:usa/{state}
+            params.push(`state=highmark:usa/${stateValue}`);
 
-            // stateAll parameter: merkle:usa/{state}/all
-            params.push(`stateAll=merkle:usa/${stateValue}/all`);
+            // stateAll parameter: highmark:usa/{state}/all
+            params.push(`stateAll=highmark:usa/${stateValue}/all`);
         }
 
         // Add LOB parameter only if a value is selected (not placeholder)
@@ -964,10 +964,10 @@ export default async function decorate(block) {
     // Function to parse regionMarket value and extract state and region
     function parseRegionMarket(regionMarketValue) {
         // Format: merkle:usa/{state}/{region}
-        // Example: merkle:usa/pa/wpa -> state: pa, region: wpa
+        // Example: highmark:usa/pa/wpa -> state: pa, region: wpa
         const parts = regionMarketValue.split('/');
 
-        if (parts.length >= 3 && parts[0] === 'merkle:usa') {
+        if (parts.length >= 3 && parts[0] === 'highmark:usa') {
             return {
                 state: parts[1],
                 region: parts[2]
