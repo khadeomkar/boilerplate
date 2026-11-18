@@ -292,7 +292,11 @@ export default async function decorate(block) {
         searchInput.value = '';
         toggleSearchCloseButton();
         currentPage = 1;
-        fetchDisclaimers(currentPage);
+        // Reset pagination state on search clear
+        currentOffset = 0;
+        isInitialLoad = true;
+        hasMoreRecords = false;
+        fetchDisclaimers();
         searchInput.focus();
     });
 
