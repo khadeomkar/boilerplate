@@ -652,6 +652,10 @@ button.disclaimer-copy-button:active {
   color: var(--black);
 }
 
+.modal-body h4:first-child {
+  margin-top: 0;
+}
+
 .disclaimer-preview-shortcode {
   display: inline-flex;
   align-items: center;
