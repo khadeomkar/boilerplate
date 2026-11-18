@@ -1077,7 +1077,9 @@ export default async function decorate(block) {
     }
 
     // Fetch filter options first, then fetch disclaimers
+    // Fetch line of business values
     fetchAndPopulateLOB();
+    // Fetch state and region values
     fetchAndPopulateStateRegions();
 
     // initial fetch on page load
