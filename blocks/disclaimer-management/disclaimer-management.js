@@ -1076,6 +1076,28 @@ export default async function decorate(block) {
         }
     }
 
+    // Add event listeners for all select dropdowns to toggle arrow state
+    const allSelects = block.querySelectorAll('.disclaimer-filter-select');
+    
+    allSelects.forEach((select) => {
+        // Toggle open class when dropdown is clicked
+        select.addEventListener('click', () => {
+            select.classList.toggle('open');
+        });
+        
+        // Remove open class when dropdown loses focus
+        select.addEventListener('blur', () => {
+            select.classList.remove('open');
+        });
+        
+        // Remove open class after a selection is made
+        select.addEventListener('change', () => {
+            setTimeout(() => {
+                select.classList.remove('open');
+            }, 150);
+        });
+    });
+
     // Fetch filter options first, then fetch disclaimers
     // Fetch line of business values
     fetchAndPopulateLOB();
