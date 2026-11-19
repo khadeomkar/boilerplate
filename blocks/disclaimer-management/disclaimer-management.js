@@ -1,6 +1,8 @@
 // old API = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/getDisclaimer'
-const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/search';
+const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/getDisclaimer';
+const API_BASE_URL_SEARCH = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/search';
 const API_BASE_URL_WITH_STATE = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-state';
+const API_BASE_URL_SEARCH_STATE = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/search-state';
 const LOB_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/lob';
 const STATE_REGIONS_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/state-regions';
 const INITIAL_API_LIMIT = 101; // Fetch 101 records on first call to check if more exist
@@ -328,9 +330,20 @@ export default async function decorate(block) {
         const stateValue = appliedFilters.state;
         const regionValue = appliedFilters.region;
         const hasStateFilter = stateValue && stateValue.trim() !== '';
+        
+        // Check if there's a search query
+        const searchQuery = searchInput.value.trim();
+        const hasSearchQuery = searchQuery !== '';
 
-        // Choose the appropriate base URL
-        const baseUrl = hasStateFilter ? API_BASE_URL_WITH_STATE : API_BASE_URL;
+        // Choose the appropriate base URL based on search query and state filter
+        let baseUrl;
+        if (hasSearchQuery) {
+            // If searching, use search-specific APIs
+            baseUrl = hasStateFilter ? API_BASE_URL_SEARCH_STATE : API_BASE_URL_SEARCH;
+        } else {
+            // If not searching, use regular APIs
+            baseUrl = hasStateFilter ? API_BASE_URL_WITH_STATE : API_BASE_URL;
+        }
 
         // Use dynamic offset and limit
         params.push(`offset=${offset}`);
@@ -358,7 +371,6 @@ export default async function decorate(block) {
         }
 
         // Always add search parameter (empty if no search query)
-        const searchQuery = searchInput.value.trim();
         params.push(`search=${searchQuery}`);
 
         // Add audience filter as individual parameters (e.g., memberAudience=true)
@@ -815,35 +827,31 @@ export default async function decorate(block) {
 
             let items = [];
             
-            // Check if response uses the new structure (byName, byId, byOwner)
-            // This happens when NOT using state filter
+            // Check if response uses the search structure (byName, byId, byOwner)
+            // This happens when using either API_BASE_URL_SEARCH or API_BASE_URL_SEARCH_STATE
             if (data?.data?.byName || data?.data?.byId || data?.data?.byOwner) {
-                const hasStateFilter = appliedFilters.state && appliedFilters.state.trim() !== '';
                 const searchQuery = searchInput.value.trim();
                 
-                // Initial load or search without state filter
-                if (!hasStateFilter) {
-                    if (!searchQuery) {
-                        // Initial load or no search: use byName
-                        items = data?.data?.byName?.items || [];
-                    } else {
-                        // Search without state filter: check which object has data
-                        const byNameItems = data?.data?.byName?.items || [];
-                        const byIdItems = data?.data?.byId?.items || [];
-                        const byOwnerItems = data?.data?.byOwner?.items || [];
-                        
-                        // Use the first object that has items
-                        if (byNameItems.length > 0) {
-                            items = byNameItems;
-                        } else if (byIdItems.length > 0) {
-                            items = byIdItems;
-                        } else if (byOwnerItems.length > 0) {
-                            items = byOwnerItems;
-                        }
+                if (!searchQuery) {
+                    // Initial load or no search: use byName
+                    items = data?.data?.byName?.items || [];
+                } else {
+                    // Search (with or without state filter): check which object has data
+                    const byNameItems = data?.data?.byName?.items || [];
+                    const byIdItems = data?.data?.byId?.items || [];
+                    const byOwnerItems = data?.data?.byOwner?.items || [];
+                    
+                    // Use the first object that has items
+                    if (byNameItems.length > 0) {
+                        items = byNameItems;
+                    } else if (byIdItems.length > 0) {
+                        items = byIdItems;
+                    } else if (byOwnerItems.length > 0) {
+                        items = byOwnerItems;
                     }
                 }
             } else {
-                // Old structure (for state filter API)
+                // Old structure (for non-search APIs: API_BASE_URL or API_BASE_URL_WITH_STATE)
                 items = data?.data?.disclaimerHubList?.items || [];
             }
 
