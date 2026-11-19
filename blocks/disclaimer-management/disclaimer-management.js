@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/getDisclaimer';
+// old API = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/getDisclaimer'
+const API_BASE_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/search';
 const API_BASE_URL_WITH_STATE = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/disclaimers-state';
 const LOB_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/lob';
 const STATE_REGIONS_API_URL = 'https://publish-p233649-e2378578.adobeaemcloud.com/graphql/execute.json/merkle-highmark/state-regions';
@@ -812,11 +813,43 @@ export default async function decorate(block) {
 
             const data = await response.json();
 
-            const items = data?.data?.disclaimerHubList?.items;
+            let items = [];
+            
+            // Check if response uses the new structure (byName, byId, byOwner)
+            // This happens when NOT using state filter
+            if (data?.data?.byName || data?.data?.byId || data?.data?.byOwner) {
+                const hasStateFilter = appliedFilters.state && appliedFilters.state.trim() !== '';
+                const searchQuery = searchInput.value.trim();
+                
+                // Initial load or search without state filter
+                if (!hasStateFilter) {
+                    if (!searchQuery) {
+                        // Initial load or no search: use byName
+                        items = data?.data?.byName?.items || [];
+                    } else {
+                        // Search without state filter: check which object has data
+                        const byNameItems = data?.data?.byName?.items || [];
+                        const byIdItems = data?.data?.byId?.items || [];
+                        const byOwnerItems = data?.data?.byOwner?.items || [];
+                        
+                        // Use the first object that has items
+                        if (byNameItems.length > 0) {
+                            items = byNameItems;
+                        } else if (byIdItems.length > 0) {
+                            items = byIdItems;
+                        } else if (byOwnerItems.length > 0) {
+                            items = byOwnerItems;
+                        }
+                    }
+                }
+            } else {
+                // Old structure (for state filter API)
+                items = data?.data?.disclaimerHubList?.items || [];
+            }
 
             if (!Array.isArray(items)) {
                 throw new Error(
-                    'Unexpected API response: data.disclaimerHubList.items is missing.',
+                    'Unexpected API response: Unable to find items array.',
                 );
             }
 
